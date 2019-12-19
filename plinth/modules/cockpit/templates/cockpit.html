@@ -1,3 +1,5 @@
+{% extends "app.html" %}
+{% comment %}
 #
 # This file is part of FreedomBox.
 #
@@ -14,8 +16,24 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-"""
-Package init file.
-"""
+{% endcomment %}
+{% load bootstrap %}
+{% load i18n %}
 
-__version__ = '19.23'
+{% block status %}
+  {{ block.super }}
+
+  <h3>{% trans "Access" %}</h3>
+
+  <p>
+    {% blocktrans trimmed %}
+        Cockpit will only work when accessed using the following URLs.
+    {% endblocktrans %}
+  </p>
+
+  <ol>
+    {% for url_ in urls %}
+    <li>{{ url_ }}</li>
+    {% endfor %}
+  </ol>
+{% endblock %}
