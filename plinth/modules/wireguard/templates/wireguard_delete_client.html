@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+{% comment %}
 #
 # This file is part of FreedomBox.
 #
@@ -14,15 +16,27 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+{% endcomment %}
 
-import configparser
-import os
-import pathlib
+{% load bootstrap %}
+{% load i18n %}
 
-config = configparser.ConfigParser()
-config.read(pathlib.Path(__file__).parent.with_name('config.ini'))
+{% block content %}
 
-config['DEFAULT']['url'] = os.environ.get('FREEDOMBOX_URL',
-                                          config['DEFAULT']['url'])
-config['DEFAULT']['samba_port'] = os.environ.get('FREEDOMBOX_SAMBA_PORT',
-                                          config['DEFAULT']['samba_port'])
+  <h3>{{ title }}</h3>
+
+  <p>
+    {% trans "Are you sure that you want to delete this client?" %}
+  </p>
+  <p>
+    <b>{{ public_key }}</b>
+  </p>
+
+  <form class="form" method="post">
+    {% csrf_token %}
+
+    <input type="submit" class="btn btn-danger"
+           value="{% trans "Delete" %}"/>
+  </form>
+
+{% endblock %}
