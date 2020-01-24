@@ -15,8 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 """
-FreedomBox app for dmx.
+FreedomBox app to configure DMX - The Context Machine.
 """
+
+import json
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -26,9 +28,10 @@ from plinth import frontpage, menu
 from plinth.daemon import Daemon
 from plinth.modules.apache.components import Webserver
 from plinth.modules.firewall.components import Firewall
+#from plinth.modules.users import add_user_to_share_group, register_group
 
+#from .manifest import backup, clients  # noqa, pylint: disable=unused-import
 from .manifest import clients  # noqa, pylint: disable=unused-import
-
 
 version = 1
 
@@ -46,11 +49,17 @@ description = [
 
 clients = clients
 
+#reserved_usernames = ['debian-transmission']
+
+#group = ('bit-torrent', _('Download files using BitTorrent applications'))
+
+#manual_page = 'Transmission'
+
 app = None
 
 
 class dmxApp(app_module.App):
-    """FreedomBox app for dmx."""
+    """FreedomBox app for DMX - The Context Machine."""
 
     app_id = 'dmx'
 
@@ -75,14 +84,16 @@ class dmxApp(app_module.App):
         webserver = Webserver('webserver-dmx', 'dmx-freedombox')
         self.add(webserver)
 
-        daemon = Daemon('daemon-dmx', managed_services[0])
+        daemon = Daemon('daemon-dmx', managed_services[0],
+        listen_ports=[(8080, 'tcp4')])
         self.add(daemon)
 
 
 def init():
-    """Initialize the module."""
+    """Initialize the DMX module."""
     global app
     app = dmxApp()
+    #register_group(group)
 
     setup_helper = globals()['setup_helper']
     if setup_helper.get_state() != 'needs-setup' and app.is_enabled():
@@ -92,7 +103,15 @@ def init():
 def setup(helper, old_version=None):
     """Install and configure the module."""
     helper.install(managed_packages)
+
+    #new_configuration = {
+    #    'rpc-whitelist-enabled': False,
+    #    'rpc-authentication-required': False
+    #}
     helper.call('post', actions.superuser_run, 'dmx', ['enable'])
+    #            ['merge-configuration'],
+    #            input=json.dumps(new_configuration).encode())
+    #add_user_to_share_group(reserved_usernames[0], managed_services[0])
     helper.call('post', app.enable)
 
 
