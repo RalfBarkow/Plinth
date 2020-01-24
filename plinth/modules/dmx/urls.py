@@ -20,15 +20,11 @@ URLs for the dmx module.
 
 from django.conf.urls import url
 
-from plinth.modules import dmx
-from plinth.views import AppView
+from plinth.modules.dmx.views import DmxAppView
 
 urlpatterns = [
     url(
         r'^apps/dmx/$',
-        AppView.as_view(app_id='dmx', name=dmx.name,
-                        diagnostics_module_name='dmx',
-                        description=dmx.description, clients=dmx.clients,
-                        show_status_block=True),
+        DmxAppView.as_view(),
         name='index'),
 ]
