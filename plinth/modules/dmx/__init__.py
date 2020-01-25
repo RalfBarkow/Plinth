@@ -18,19 +18,16 @@
 FreedomBox app to configure DMX - The Context Machine.
 """
 
-import json
-
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
-from plinth import action_utils, actions
 from plinth import app as app_module
-from plinth import frontpage, menu
+from plinth import cfg, frontpage, menu
 from plinth.daemon import Daemon
 from plinth.modules.apache.components import Webserver
 from plinth.modules.firewall.components import Firewall
-#from plinth.modules.users import add_user_to_share_group, register_group
+# from plinth.modules.users import add_user_to_share_group, register_group
 
-#from .manifest import backup, clients  # noqa, pylint: disable=unused-import
 from .manifest import clients  # noqa, pylint: disable=unused-import
 
 version = 1
@@ -39,26 +36,27 @@ managed_services = ['dmx']
 
 managed_packages = ['dmx']
 
-name = _('')
+name = _('DMX')
 
-short_description = _('')
+short_description = _('Platform for knowledge management and collaboration')
 
 description = [
-    _(''),
+    _('DMX is a platform for knowledge management and collaboration.'),
+    _('DMX is a web application. It comes with a built-in Jetty web server and a default web client that brings the application to your browser.')
 ]
 
 clients = clients
 
-#reserved_usernames = ['debian-transmission']
+# reserved_usernames = ['debian-transmission']
 
-#group = ('bit-torrent', _('Download files using BitTorrent applications'))
+# group = ('bit-torrent', _('Download files using BitTorrent applications'))
 
-#manual_page = 'Transmission'
+# manual_page = 'Transmission'
 
 app = None
 
 
-class dmxApp(app_module.App):
+class DmxApp(app_module.App):
     """FreedomBox app for DMX - The Context Machine."""
 
     app_id = 'dmx'
@@ -67,33 +65,34 @@ class dmxApp(app_module.App):
         """Create components for the app."""
         super().__init__()
         menu_item = menu.Menu('menu-dmx', name, short_description,
-                              'glyphicon-refresh', 'dmx:index',
+                              'dmx', 'dmx:index',
                               parent_url_name='apps')
         self.add(menu_item)
 
         shortcut = frontpage.Shortcut(
             'shortcut-dmx', name, short_description=short_description,
-            icon='glyphicon-refresh', url='/dmx', clients=clients,
-            login_required=True)
+            icon='glyphicon-refresh', description=description,
+            configure_url=reverse_lazy('dmx:index'), login_required=True,
+            clients=clients)
         self.add(shortcut)
 
-        firewall = Firewall('firewall-dmx', name, ports=['http', 'https'],
-                            is_external=True)
+        firewall = Firewall('firewall-dmx', name,
+                            ports=['dmx-freedombox'], is_external=True)
         self.add(firewall)
 
         webserver = Webserver('webserver-dmx', 'dmx-freedombox')
         self.add(webserver)
 
         daemon = Daemon('daemon-dmx', managed_services[0],
-        listen_ports=[(8080, 'tcp4')])
+                        listen_ports=[(8080, 'tcp4')])
         self.add(daemon)
 
 
 def init():
     """Initialize the DMX module."""
     global app
-    app = dmxApp()
-    #register_group(group)
+    app = DmxApp()
+    # register_group(group)
 
     setup_helper = globals()['setup_helper']
     if setup_helper.get_state() != 'needs-setup' and app.is_enabled():
@@ -104,14 +103,14 @@ def setup(helper, old_version=None):
     """Install and configure the module."""
     helper.install(managed_packages)
 
-    #new_configuration = {
+    # new_configuration = {
     #    'rpc-whitelist-enabled': False,
     #    'rpc-authentication-required': False
-    #}
+    # }
     helper.call('post', actions.superuser_run, 'dmx', ['enable'])
     #            ['merge-configuration'],
     #            input=json.dumps(new_configuration).encode())
-    #add_user_to_share_group(reserved_usernames[0], managed_services[0])
+    # add_user_to_share_group(reserved_usernames[0], managed_services[0])
     helper.call('post', app.enable)
 
 
