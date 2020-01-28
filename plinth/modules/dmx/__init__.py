@@ -137,4 +137,10 @@ def init():
 def setup(helper, old_version=None):
     """Install and configure the module."""
     helper.install(managed_packages)
-    helper.call('post', app.enable)
+# //FIXME Part 5: Customizing > Writing actions for:
+#
+# # Add the file /etc/apt/sources.list.d/dmx-repo.list
+# ~$ sudo bash -c 'echo "deb https://download.dmx.systems/repos/ubuntu/ xenial/" >/etc/apt/sources.list.d/dmx-repo.list'
+#
+# # Add the key:
+# ~$ curl -fsSL https://download.dmx.systems/repos/gpg | sudo apt-key add -
