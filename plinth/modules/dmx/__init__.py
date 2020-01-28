@@ -93,7 +93,10 @@ class DmxApp(app_module.App):
         self.add(webserver)
 
         daemon = Daemon('daemon-dmx', managed_services[0],
-                        listen_ports=[(8080, 'tcp4')])
+                        listen_ports=[(8080, 'tcp4'), (8081, 'tcp4'), (8443, 'tcp4')])
+        # org.osgi.service.http.port,   TCP, IPv4, 8080 (8080)
+        # dmx.websockets.port,          TCP, IPv4, 8081 (8081)
+        # org.osgi.service.http.port.secure, IPv4, 8443 (8443)
         self.add(daemon)
 
 
