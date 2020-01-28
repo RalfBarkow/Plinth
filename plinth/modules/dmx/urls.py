@@ -20,7 +20,7 @@ URLs for the dmx module.
 
 from django.conf.urls import url
 
-from plinth.modules.dmx.views import DmxAppView
+from .views import DmxAppView
 
 urlpatterns = [
     url(
