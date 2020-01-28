@@ -19,6 +19,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from plinth.clients import validate
 
+_download_url = 'https://dmx.berlin/demo-download'
+
 clients = validate([{
     'name': _('dmx'),
     'platforms': [{

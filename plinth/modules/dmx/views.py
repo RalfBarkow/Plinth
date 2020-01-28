@@ -27,3 +27,4 @@ class DmxAppView(views.AppView):
     name = dmx.name
     description = dmx.description
     app_id = 'dmx'
+    clients = dmx.clients
