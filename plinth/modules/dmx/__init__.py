@@ -85,19 +85,20 @@ class DmxApp(app_module.App):
             clients=clients)
         self.add(shortcut)
 
-        firewall = Firewall('firewall-dmx', name,
-                            ports=['dmx-freedombox'], is_external=True)
-        self.add(firewall)
-
-        webserver = Webserver('webserver-dmx', 'dmx-freedombox')
-        self.add(webserver)
-
         daemon = Daemon('daemon-dmx', managed_services[0],
                         listen_ports=[(8080, 'tcp4'), (8081, 'tcp4'), (8443, 'tcp4')])
         # org.osgi.service.http.port,   TCP, IPv4, 8080 (8080)
         # dmx.websockets.port,          TCP, IPv4, 8081 (8081)
         # org.osgi.service.http.port.secure, IPv4, 8443 (8443)
         self.add(daemon)
+
+        webserver = Webserver('webserver-dmx', 'dmx-freedombox',
+                              urls=['http://{host}:8080/systems.dmx.webclient/'])
+        self.add(webserver)
+
+        firewall = Firewall('firewall-dmx', name,
+                            ports=['dmx-freedombox'], is_external=True)
+        self.add(firewall)
 
 
 def init():
