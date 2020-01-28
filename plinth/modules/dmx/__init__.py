@@ -101,11 +101,33 @@ class DmxApp(app_module.App):
         self.add(firewall)
 
 
+def enable(self):
+    """Enable the app by simply storing a flag in key/value store."""
+    from plinth import kvstore
+    super().enable()
+    kvstore.set('dmx-enabled', True)
+    utils.enable_connections(True)
+
+
+def disable(self):
+    """Disable the app by simply storing a flag in key/value store."""
+    from plinth import kvstore
+    super().disable()
+    kvstore.set('dmx-enabled', False)
+    utils.enable_connections(False)
+
+
+def is_enabled(self):
+    """Return whether all leader components are enabled and flag is set."""
+    from plinth import kvstore
+    enabled = super().is_enabled()
+    return enabled and kvstore.get_default('dmx-enabled', False)
+
+
 def init():
-    """Initialize the DMX module."""
+    """Initialize the module."""
     global app
     app = DmxApp()
-    # register_group(group)
 
     setup_helper = globals()['setup_helper']
     if setup_helper.get_state() != 'needs-setup' and app.is_enabled():
@@ -115,24 +137,10 @@ def init():
 def setup(helper, old_version=None):
     """Install and configure the module."""
     helper.install(managed_packages)
-
-    # new_configuration = {
-    #    'rpc-whitelist-enabled': False,
-    #    'rpc-authentication-required': False
-    # }
-    helper.call('post', actions.superuser_run, 'dmx', ['enable'])
-    #            ['merge-configuration'],
-    #            input=json.dumps(new_configuration).encode())
-    # add_user_to_share_group(reserved_usernames[0], managed_services[0])
-    helper.call('post', app.enable)
-
-
-def diagnose():
-    """Run diagnostics and return the results."""
-    results = []
-
-    results.extend(
-        action_utils.diagnose_url_on_all('https://{host}/dmx',
-                                         check_certificate=False))
-
-    return results
+# //FIXME Part 5: Customizing > Writing actions for:
+#
+# # Add the file /etc/apt/sources.list.d/dmx-repo.list
+# ~$ sudo bash -c 'echo "deb https://download.dmx.systems/repos/ubuntu/ xenial/" >/etc/apt/sources.list.d/dmx-repo.list'
+#
+# # Add the key:
+# ~$ curl -fsSL https://download.dmx.systems/repos/gpg | sudo apt-key add -
