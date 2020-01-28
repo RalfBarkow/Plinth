@@ -18,14 +18,21 @@
 FreedomBox app to configure DMX - The Context Machine.
 """
 
+import pathlib
+
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
+from plinth.menu import main_menu
+
+from plinth import actions
 from plinth import app as app_module
 from plinth import cfg, frontpage, menu
 from plinth.daemon import Daemon
-from plinth.modules.apache.components import Webserver
+# from plinth.modules import names # FreedomBox app to configure name services.
 from plinth.modules.firewall.components import Firewall
+from plinth.modules.apache.components import Webserver
+
 # from plinth.modules.users import add_user_to_share_group, register_group
 
 from .manifest import clients  # noqa, pylint: disable=unused-import
@@ -35,6 +42,8 @@ version = 1
 managed_services = ['dmx']
 
 managed_packages = ['dmx']
+
+managed_paths = [pathlib.Path('/var/lib/dmx/')]
 
 name = _('DMX')
 
