@@ -17,25 +17,13 @@
 """
 Views for the DMX module
 """
-#from plinth.modules.dmx import (clients, description, icon_filename,
-#                                    manual_page, name)
-from plinth.modules.dmx import (clients, description, name)
-from plinth.views import AppView
+
+from plinth import views
+from plinth.modules import dmx
 
 
-class DmxAppView(AppView):
+class DmxAppView(views.AppView):
+    """Serve configuration page."""
+    name = dmx.name
+    description = dmx.description
     app_id = 'dmx'
-    name = name
-    description = description
-    show_status_block = True
-    clients = clients
-    #manual_page = manual_page
-    template_name = 'dmx.html'
-    #icon_filename = icon_filename
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        urls = get_origin_domains(load_augeas())
-        context['urls'] = [url for url in urls if 'localhost' not in url]
-
-        return context
