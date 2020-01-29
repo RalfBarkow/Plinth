@@ -97,7 +97,7 @@ class DmxApp(app_module.App):
         self.add(webserver)
 
         firewall = Firewall('firewall-dmx', name,
-                            ports=['dmx-freedombox'], is_external=True)
+                            ports=['http', 'https'], is_external=True)
         self.add(firewall)
 
 
