@@ -25,6 +25,6 @@ clients = validate([{
     'name': _('dmx'),
     'platforms': [{
         'type': 'web',
-        'url': '/dmx'
+        'url': '/systems.dmx.webclient/'
     }]
 }])
