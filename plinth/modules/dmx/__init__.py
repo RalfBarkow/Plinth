@@ -47,11 +47,12 @@ managed_paths = [pathlib.Path('/var/lib/dmx/')]
 
 name = _('DMX')
 
-short_description = _('Platform for knowledge management and collaboration')
+short_description = _(
+    'Semantic web platform for knowledge management and collaboration')
 
 description = [
-    _('DMX is a platform for knowledge management and collaboration.'),
-    _('DMX is a web application. It comes with a built-in Jetty web server and a default web client that brings the application to your browser.')
+    _('DMX – The Context Machine is a tool for authoring, structuring and exploring networked information. Based on a powerful associative database you can create Topicmaps and populate them with Topics. Topics represent individual items which can be related through Associations.'),
+    _('DMX is a web application. It comes with a built-in Jetty web server and a default web client that brings the application to your browser. To explore and visualize your data you can use the web client.')
 ]
 
 clients = clients
