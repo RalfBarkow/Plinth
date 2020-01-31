@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<service>
+    <short>DMX - The Context Machine</short>
+    <description>Semantic web platform for knowledge management and collaboration</description>
+    <port protocol="tcp" port="8443" />
+</service>

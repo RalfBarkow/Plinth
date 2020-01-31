@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<service>
-    <short>DMX - The Context Machine</short>
-    <description>DMX is a platform for knowledge management and collaboration. </description>
-    <port protocol="tcp" port="8080" />
-    <port protocol="tcp" port="8081" />
-    <port protocol="tcp" port="8443" />
-</service>

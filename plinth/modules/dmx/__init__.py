@@ -61,7 +61,15 @@ clients = clients
 
 # group = ('bit-torrent', _('Download files using BitTorrent applications'))
 
-# manual_page = 'Transmission'
+# manual_page = 'DMX'
+
+port_forwarding_info = [
+    ('TCP', 8443)
+]
+
+tunnels_to_manage = {
+    'DMX HTTP Proxy': 'dmx-http-proxy-freedombox'
+}
 
 app = None
 
@@ -94,11 +102,12 @@ class DmxApp(app_module.App):
         self.add(daemon)
 
         webserver = Webserver('webserver-dmx', 'dmx-freedombox',
-                              urls=['http://{host}:8080/systems.dmx.webclient/'])
+                              urls=['http://{host}:8443/systems.dmx.webclient/'])
         self.add(webserver)
 
         firewall = Firewall('firewall-dmx', name,
-                            ports=['http', 'https'], is_external=True)
+                            ports=tunnels_to_manage.values(),
+                            is_external=True)
         self.add(firewall)
 
 
