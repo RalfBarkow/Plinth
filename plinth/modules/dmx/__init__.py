@@ -154,3 +154,4 @@ def setup(helper, old_version=None):
 #
 # # Add the key:
 # ~$ curl -fsSL https://download.dmx.systems/repos/gpg | sudo apt-key add -
+    helper.call('post', app.enable)
