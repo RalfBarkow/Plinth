@@ -26,7 +26,7 @@ version = 5
 
 managed_services = ['matrix-synapse']
 
-managed_packages = ['matrix-synapse', 'matrix-synapse-ldap3']
+managed_packages = ['matrix-synapse', 'matrix-synapse-ldap3', 'coturn']
 
 managed_paths = [pathlib.Path('/etc/matrix-synapse/')]
 
