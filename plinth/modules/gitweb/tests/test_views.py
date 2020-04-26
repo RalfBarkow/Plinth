@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Tests for gitweb views.
 """
@@ -161,8 +146,10 @@ def test_create_repo_invalid_name_view(rf):
 
 def test_create_repo_failed_view(rf):
     """Test that repo creation failure sends correct error message."""
-    with patch('plinth.modules.gitweb.create_repo',
-               side_effect=ActionError('Error')):
+    general_error_message = "An error occurred while creating the repository."
+    error_description = 'some error'
+    with patch('plinth.modules.gitweb.create_repo', side_effect=ActionError(
+            'gitweb', '', error_description)):
         form_data = {
             'gitweb-name': 'something_other',
             'gitweb-description': '',
@@ -172,8 +159,8 @@ def test_create_repo_failed_view(rf):
         view = views.CreateRepoView.as_view()
         response, messages = make_request(request, view)
 
-        assert list(messages)[
-            0].message == 'An error occurred while creating the repository.'
+        assert list(messages)[0].message == '{0} {1}'.format(
+            general_error_message, error_description)
         assert response.status_code == 302
 
 

@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 @apps @pagekite @backups
 Feature: Pagekite Public Visibility
@@ -26,7 +11,7 @@ Background:
 Scenario: Enable pagekite application
   Given the pagekite application is disabled
   When I enable the pagekite application
-  Then pagekite should be enabled
+  Then the pagekite service should be running
 
 Scenario: Configure pagekite application
   Given the pagekite application is enabled
@@ -39,10 +24,10 @@ Scenario: Backup and restore pagekite
   And I create a backup of the pagekite app data
   And I configure pagekite with host afterbackup.example.com, port 8082, kite name afterbackup.example.com and kite secret afterbackupsecret
   And I restore the pagekite app data backup
-  Then pagekite should be enabled
+  Then the pagekite service should be running
   And pagekite should be configured with host beforebackup.example.com, port 8081, kite name beforebackup.example.com and kite secret beforebackupsecret
 
 Scenario: Disable pagekite application
   Given the pagekite application is enabled
   When I disable the pagekite application
-  Then pagekite should be disabled
+  Then the pagekite service should not be running

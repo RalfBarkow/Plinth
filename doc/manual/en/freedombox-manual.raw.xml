@@ -5,6 +5,12 @@
     <title>FreedomBox/Manual</title>
     <revhistory>
       <revision>
+        <revnumber>81</revnumber>
+        <date>2020-02-21 15:51:40</date>
+        <authorinitials>JosephNuthalapati</authorinitials>
+        <revremark>Add entry for Samba</revremark>
+      </revision>
+      <revision>
         <revnumber>80</revnumber>
         <date>2019-12-25 18:43:42</date>
         <authorinitials>Drahtseil</authorinitials>
@@ -487,24 +493,11 @@
     <title>FreedomBox: take your online privacy back</title>
     <para>FreedomBox is a ready made personal server, designed with privacy and data ownership in mind. It is a subset of the <ulink url="https://www.debian.org/">Debian universal operating system</ulink> and includes free software only. You can run it on a small, inexpensive and power-efficient computer box in your home that is dedicated for that use. It can also be installed on any computer running Debian or in a virtual machine.</para>
     <para>In order to replace third-party communication services that are data mining your entire life, you will be able to host services yourself and use them at home or over the Internet through a browser or specialized apps. These services include chat and voice calls, webmail, file sharing and calendar, address book and news feed synchronization. For example, to start using a private chat service, activate the service from the administration interface and add your friends as authorized users of the service. They will be able to connect to the service hosted on your FreedomBox, using XMPP chat clients such as Conversations on Android, Pidgin on Windows and Linux, or Messages on Mac OS, for encrypted communications.</para>
-    <para>FreedomBox can also host a Wi-Fi access point, ad blocking proxy and a virtual private network (VPN). More advanced users can replace their router with a FreedomBox. </para>
-    <para>To set up FreedomBox at home on a specific hardware or on your computer running Debian may require a bit of technical expertise or help from the community. Once installed the interface is easy to use, similar to a smart phone. </para>
-    <para>Related documentation: </para>
+    <para>FreedomBox is a product you can just <ulink url="https://freedomboxfoundation.org/buy/">buy</ulink>, set up and use. Once installed the interface is easy to use, similar to a smart phone. </para>
+    <para>User documentation: </para>
     <itemizedlist>
       <listitem>
-        <para>
-          <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox/Features#">FreedomBox applications</ulink>
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox/Hardware#">Machines that support FreedomBox</ulink>
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox/Download#">Download and Install</ulink>
-        </para>
+        <para>List of <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox/Features#">applications</ulink> offered by FreedomBox. </para>
       </listitem>
       <listitem>
         <para>
@@ -514,6 +507,21 @@
       <listitem>
         <para>
           <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox/Support#">Live Help from the community</ulink>
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>FreedomBox can also host a Wi-Fi access point, ad blocking proxy and a virtual private network (VPN). More advanced users can replace their router with a FreedomBox. </para>
+    <para>Setting up FreedomBox on a specific hardware or on your computer running Debian may require a bit of technical expertise or help from the community. </para>
+    <para>Related technical documentation: </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox/Hardware#">Machines that support FreedomBox</ulink>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox/Download#">Download and Install</ulink>
         </para>
       </listitem>
       <listitem>
@@ -592,10 +600,20 @@
           <para>Plug one end of your ethernet cord into your FreedomBox's ethernet port, and plug the other end into your router. </para>
         </listitem>
         <listitem>
-          <para>Power on the FreedomBox. <emphasis role="strong">Note:</emphasis> On most single board computers, don't expect any output on a monitor connected via HDMI as the support may not exist in the kernel. See below to access and control your FreedomBox via network. </para>
+          <para>Power on the FreedomBox. </para>
+          <itemizedlist>
+            <listitem>
+              <para><emphasis role="strong">Note:</emphasis> On most single board computers, don't expect any output on a monitor connected via HDMI as the support may not exist in the kernel. See below to access and control your FreedomBox via network. </para>
+            </listitem>
+          </itemizedlist>
         </listitem>
         <listitem>
-          <para>On first boot, FreedomBox will perform its initial setup (older versions of FreedomBox reboot after this step). This process may take several minutes on some machines. After giving it about 10 minutes, proceed to the next step. <emphasis role="strong">Note:</emphasis> Currently, due a known bug, you need to restart your FreedomBox after 10m and then proceed to the next step. </para>
+          <para>On first boot, FreedomBox will perform its initial setup (older versions of FreedomBox reboot after this step). This process may take several minutes on some machines. After giving it about 10 minutes, proceed to the next step. </para>
+          <itemizedlist>
+            <listitem>
+              <para><emphasis role="strong">Note:</emphasis> Currently, due a known bug, you need to restart your FreedomBox after 10m and then proceed to the next step. </para>
+            </listitem>
+          </itemizedlist>
         </listitem>
         <listitem>
           <para>After the FreedomBox has finished its initial setup, you can access its web interface (called Plinth) through your web browser. </para>
@@ -1147,13 +1165,13 @@ dd if=temp/usr/lib/u-boot/A20-OLinuXino-Lime2/u-boot-sunxi-with-spl.bin of=<lime
       <section>
         <title>Screenshot</title>
         <para>
-          <remark>Add when/if an interface is made for Plinth</remark>
+          <remark>Add when/if an interface is made for <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox#">FreedomBox</ulink></remark>
         </para>
       </section>
       <section>
         <title>Using User websites</title>
-        <para>The module is always enabled and offers no configuration from the Plinth web interface. Currently its existence is not even visible in the Plinth web interface. </para>
-        <para>Using the modules capability to serve documents requires just to place the documents in the designated directory in a Plinth user's home directory in the filesystem. </para>
+        <para>The module is always enabled and offers no configuration from the FreedomBox web interface. There is no configuration or status page shown for this module in the FreedomBox web interface. </para>
+        <para>To serve documents, place the files in the designated directory in a FreedomBox user's home directory in the filesystem. </para>
         <para>This directory is: <emphasis role="strong">public_html</emphasis> </para>
         <para>Thus the absolute path for the directory of a user named fbx with home directory in /home/fbx will be <emphasis role="strong">/home/fbx/public_html</emphasis>. User websites will serve documents placed in this directory when requests for documents with the URI path "~fbx" are received. For the the example.org domain thus a request for the document example.org/~fbx/index.html will transfer the file in /home/fbx/public_html/index.html. </para>
       </section>
@@ -1788,7 +1806,9 @@ if [ -f /etc/default/radicale.dpkg-dist ] ; then cp /etc/default/radicale.dpkg-d
       </section>
       <section>
         <title>Setting up Matrix Synapse on your FreedomBox</title>
-        <para>To enable Matrix, first navigate to the Chat Server (Matrix Synapse) page and install it. Matrix needs a valid domain name to be configured.  After installation, you will be asked to configure it.  You will be able to select a domain from a drop down menu of available domains.  Domains are configured using System -&gt; Configure page.  After configuring a domain, you will see that the service is running. The service will be accessible on the configured FreedomBox domain. All the registered users will have their Matrix IDs as <code>@username:domain</code>. Currently, you will not be able to change the domain once is it configured. </para>
+        <para>To enable Matrix, first navigate to the Chat Server (Matrix Synapse) page and install it. Matrix needs a valid domain name to be configured.  After installation, you will be asked to configure it.  You will be able to select a domain from a drop down menu of available domains.  Domains are configured using System -&gt; Configure page.  After configuring a domain, you will see that the service is running. The service will be accessible on the configured FreedomBox domain. Currently, you will not be able to change the domain once is it configured. </para>
+        <para>Your router has to be configured to forward port 8448. </para>
+        <para>All the registered users of your FreedomBox will have their Matrix IDs as <code>@username:domain</code>. If public registration is enabled, also your chosen client can be used to register a user account. </para>
       </section>
       <section>
         <title>Federating with other Matrix instances</title>
@@ -2000,6 +2020,38 @@ echo "UPDATE users SET admin=1 WHERE name='@username:domainname'" | sudo sqlite3
           <title>Password Manager</title>
           <para>Password managers that store their databases in files are suitable for synchronization using Syncthing. The following example describes using a free password manager called KeePassXC in combination with Syncthing to serve as a replacement for proprietary password managers that store your passwords in the cloud. </para>
           <para>KeePassXC stores usernames, passwords etc. in files have the .kdbx extension. These kdbx files can be stored in a Syncthing shared folder to keep them synchronized on multiple machines. Free software applications which can read this file format are available for both desktop and mobile. You typically have to just point the application at the .kdbx file and enter the master password to access your stored credentials. For example, the same kdbx file can be accessed by using KeePassXC on desktop and KeePassDX on Android. KeePassXC can also be used to fill credentials into login fields in the browser by installing a browser extension. </para>
+        </section>
+      </section>
+    </section>
+    <section>
+      <title>File Synchronization (Samba)</title>
+      <para>Samba lets you have a shared folder over the local network that can be used from multiple computers running different operating systems. We will henceforth refer to these shared folders as "shares".  </para>
+      <para>You can have a personal folder shared between your own devices (Home share), a folder shared with a trusted group (Group share) or one that is shared with every device on the network (Open share). </para>
+      <para>Samba lets you to treat a share as if it's a local folder on your computer. However, shares are available only on the local network. </para>
+      <para>To learn more about Samba, please refer to the <ulink url="https://wiki.samba.org/index.php/User_Documentation">user documentation</ulink> on their wiki. </para>
+      <para><emphasis>Available since version:</emphasis>  19.22 </para>
+      <section>
+        <title>Using Samba</title>
+        <para>After installation, you can choose which disks to use for sharing. Enabled shares are accessible in the file manager on your computer at location \\freedombox (on Windows) or smb://freedombox.local (on Linux and Mac). There are three types of shares you can choose from: </para>
+        <para><emphasis role="strong">Open share</emphasis> - accessible to everyone in your local network.</para>
+        <para><emphasis role="strong">Group share</emphasis> - accessible only to FreedomBox users who are in the <emphasis>freedombox-share</emphasis> group.</para>
+        <para><emphasis role="strong">Home share</emphasis> - every user in the <emphasis>freedombox-share group</emphasis> can have their own private space. </para>
+        <section>
+          <title>On Android</title>
+          <para>To access Samba shares on an Android device, install "Android Samba Client" from F-Droid or Google Play. Enter <emphasis>smb://freedombox.local/&lt;disk&gt;</emphasis> as the share path in the app. Your shared folders should then be visible in the file manager app. </para>
+        </section>
+      </section>
+      <section>
+        <title>Integration with other apps</title>
+        <para>Transmission app on FreedomBox provides a setting to allow downloads to be saved directly to a Samba share. </para>
+      </section>
+      <section>
+        <title>Comparison with other apps</title>
+        <section>
+          <title>Syncthing</title>
+          <para><ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox/Manual/Syncthing#">Syncthing</ulink> maintains a copy of the shared folder on each device that it is shared with. Samba maintains only one copy on your FreedomBox device. </para>
+          <para>Syncthing can synchronize your shared folders between devices over the Internet. Samba shares are only available on the local network. </para>
+          <para>Since Syncthing is primarily a synchronization solution, it has features like conflict resolution and versioning. Samba has only copy of the file, so it doesn't need such features. For example, if two people are editing a spreadsheet stored on a Samba share, the last one to save the file wins. </para>
         </section>
       </section>
     </section>
@@ -2573,7 +2625,7 @@ echo "UPDATE users SET admin=1 WHERE name='@username:domainname'" | sudo sqlite3
           <ulink url="https://username:password@my.freedombox.rocks/gitweb/myrepo"/>
         </para>
         <para>Your username and password will be encrypted. Someone monitoring the network traffic will notice the domain name only.</para>
-        <para><emphasis role="strong">Note:</emphasis> If using this method, your password will be stored in plain text in the local repository's .git/config file. For this reason, you should create a <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox#">FreedomBox</ulink> user who has only access to the gitweb and not to use an admin account. </para>
+        <para><emphasis role="strong">Note:</emphasis> If using this method, your password will be stored in plain text in the local repository's .git/config file. For this reason, you should create a FreedomBox user who has only access to the gitweb and never use an admin account. </para>
       </section>
       <section>
         <title>Mirroring</title>
@@ -6674,13 +6726,13 @@ nmcli con modify "<connection_name>" connection.zone internal]]></screen>
         <title>Setting Up A User Account</title>
         <section>
           <title>Plinth First Log In: Admin Account</title>
-          <para>When creating an account in Plinth for the first time, this user will automatically have administrator capabilities. <code>Admin</code> users are able to log in using ssh (see Logging In below) and have superuser privileges via sudo. </para>
+          <para>When creating an account in FreedomBox's web interface for the first time, this user will automatically have administrator capabilities. <code>Admin</code> users are able to log in using ssh (see Logging In below) and have superuser privileges via sudo. </para>
         </section>
         <section>
           <title>Default User Account</title>
           <itemizedlist>
             <listitem>
-              <para>Note: If you can access Plinth, then you don't need to do this. You can use the user account created in Plinth to connect to SSH. </para>
+              <para>Note: If you can access FreedomBox's web interface, then you don't need to do this. You can use the user account created in FreedomBox's web interface to connect to SSH. </para>
             </listitem>
           </itemizedlist>
           <para>The pre-built FreedomBox images have a default user account called "fbx". However the password is not set for this account, so it will not be possible to log in with this account by default. </para>
@@ -6732,7 +6784,7 @@ nmcli con modify "<connection_name>" connection.zone internal]]></screen>
       </section>
       <section>
         <title>Changing Password</title>
-        <para>To change the password of a user managed by Plinth, use the change password page.  However, the <code>fbx</code> default user is not managed by Plinth and its password cannot be changed in the web interface. </para>
+        <para>To change the password of a user managed by FreedomBox's web interface, use the change password page.  However, the <code>fbx</code> default user is not managed by FreedomBox's web interface and its password cannot be changed through it. </para>
         <para>To change password on the terminal, log in to your FreedomBox as the user whose password you want to change. Then, run the following command: </para>
         <screen><![CDATA[$ passwd]]></screen>
         <para>This will ask you for your current password before giving you the opportunity to set a new one. </para>
@@ -7124,7 +7176,23 @@ Password: <enter user password here>
                   <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox/Hardware/BananaPro#">Banana Pro</ulink>
                 </para>
               </entry>
-              <entry colsep="1" rowsep="1"/>
+              <entry align="center" colsep="1" rowsep="1">
+                <para>
+                  <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox/Hardware/OrangePiZero#">
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata fileref="https://wiki.debian.org/FreedomBox/Hardware?action=AttachFile&amp;do=get&amp;target=orange-pi-zero_thumb.jpg" width="235"/>
+                      </imageobject>
+                      <textobject>
+                        <phrase>Orange Pi Zero</phrase>
+                      </textobject>
+                    </inlinemediaobject>
+                  </ulink>
+                </para>
+                <para>
+                  <ulink url="https://wiki.debian.org/FreedomBox/Manual/FreedomBox/Hardware/OrangePiZero#">Orange Pi Zero</ulink>
+                </para>
+              </entry>
             </row>
           </tbody>
         </tgroup>
@@ -7786,7 +7854,45 @@ Password: <enter user password here>
                   </para>
                 </entry>
                 <entry colsep="1" rowsep="1">
-                  <para>10/100/1000  </para>
+                  <para>1000  </para>
+                </entry>
+                <entry colsep="1" rowsep="1">
+                  <para>
+                    <inlinemediaobject>
+                      <imageobject>
+                        <imagedata depth="16" fileref="https://wiki.debian.org/htdocs/debwiki/img/icon-error.png" width="16"/>
+                      </imageobject>
+                      <textobject>
+                        <phrase>{X}</phrase>
+                      </textobject>
+                    </inlinemediaobject>
+                  </para>
+                </entry>
+              </row>
+              <row rowsep="1">
+                <entry colsep="1" rowsep="1">
+                  <para>Orange Pi Zero          </para>
+                </entry>
+                <entry colsep="1" rowsep="1">
+                  <para>?x4  </para>
+                </entry>
+                <entry colsep="1" rowsep="1">
+                  <para>armhf/sunxi     </para>
+                </entry>
+                <entry colsep="1" rowsep="1">
+                  <para>¼,½</para>
+                </entry>
+                <entry colsep="1" rowsep="1">
+                  <para>-</para>
+                </entry>
+                <entry colsep="1" rowsep="1">
+                  <para>-     </para>
+                </entry>
+                <entry colsep="1" rowsep="1">
+                  <para> -     </para>
+                </entry>
+                <entry colsep="1" rowsep="1">
+                  <para>100   </para>
                 </entry>
                 <entry colsep="1" rowsep="1">
                   <para>
@@ -10057,6 +10163,349 @@ wget https://www.thinkpenguin.com/files/ath9k_firmware_free-version/htc_7010.fw]
       <title>Release Notes</title>
       <para>The following are the release notes for each FreedomBox version. </para>
       <section>
+        <title>FreedomBox 20.7 (2020-04-20)</title>
+        <itemizedlist>
+          <listitem>
+            <para>matrixsynapse: Fix initial installation and upgrade from backports </para>
+          </listitem>
+          <listitem>
+            <para>gitweb: Improve error handling when creating repository </para>
+          </listitem>
+          <listitem>
+            <para>locale: Update translations for French, Serbian, and Telugu </para>
+          </listitem>
+        </itemizedlist>
+      </section>
+      <section>
+        <title>FreedomBox 20.6.1 (2020-04-11)</title>
+        <itemizedlist>
+          <listitem>
+            <para>users: Restore line of help text that was accidentally dropped </para>
+          </listitem>
+          <listitem>
+            <para>debian: Add firmware-ath9k-htc to Recommends </para>
+          </listitem>
+          <listitem>
+            <para>gitweb: Use proper ellipsis char when showing clone progress </para>
+          </listitem>
+          <listitem>
+            <para>locale: Update translations for Norwegian Bokmål, German, French, Portuguese, Italian, Russian, and Serbian </para>
+          </listitem>
+        </itemizedlist>
+      </section>
+      <section>
+        <title>FreedomBox 20.6 (2020-04-06)</title>
+        <itemizedlist>
+          <listitem>
+            <para>app: Ensure toggle buttons work independently of configuration form </para>
+          </listitem>
+          <listitem>
+            <para>networks, monkeysphere: Make styling more specific to avoid interference </para>
+          </listitem>
+          <listitem>
+            <para>syncthing: Update description to mention 'syncthing' group </para>
+          </listitem>
+          <listitem>
+            <para>radicale: Support upgrade up to any 2.x version </para>
+          </listitem>
+          <listitem>
+            <para>packages: Hold freedombox package during package installs </para>
+          </listitem>
+          <listitem>
+            <para>users: Add component for managing users and groups </para>
+          </listitem>
+          <listitem>
+            <para>app: Fix grammar in developer documentation string </para>
+          </listitem>
+          <listitem>
+            <para>ikiwiki: Disable public edits of blog pages </para>
+          </listitem>
+          <listitem>
+            <para>ikiwiki: Add moderation of blog comments </para>
+          </listitem>
+          <listitem>
+            <para>firewalld: Support upgrade up to any 0.8.x version </para>
+          </listitem>
+          <listitem>
+            <para>infinoted: Fix permissions of sync directory </para>
+          </listitem>
+          <listitem>
+            <para>locale: Added Serbian translation </para>
+          </listitem>
+          <listitem>
+            <para>locale: Update translations for Russian, French, German, Czech, Italian, Hindi, Telugu, and Spanish </para>
+          </listitem>
+        </itemizedlist>
+      </section>
+      <section>
+        <title>FreedomBox 20.5.1 (2020-03-26)</title>
+        <itemizedlist>
+          <listitem>
+            <para>networks: Update label wording in topology form </para>
+          </listitem>
+          <listitem>
+            <para>jsxc: Fix issue with serving static files </para>
+          </listitem>
+          <listitem>
+            <para>debian: Separate binary packages for each language manual </para>
+          </listitem>
+          <listitem>
+            <para>locale: Update translations for Norwegian Bokmål and German </para>
+          </listitem>
+        </itemizedlist>
+      </section>
+      <section>
+        <title>FreedomBox 20.5 (2020-03-23)</title>
+        <itemizedlist>
+          <listitem>
+            <para>app: Fix description block in app header </para>
+          </listitem>
+          <listitem>
+            <para>pagekite: Don't signal new domain on init if app is disabled </para>
+          </listitem>
+          <listitem>
+            <para>pagekite: Don't attempt to notify about domain if app is disabled </para>
+          </listitem>
+          <listitem>
+            <para>pagekite: Remove app enabled checking from getting configuration </para>
+          </listitem>
+          <listitem>
+            <para>pagekite: On enable/disable, add/remove domain from names module </para>
+          </listitem>
+          <listitem>
+            <para>pagekite: Fix an error message in custom services form </para>
+          </listitem>
+          <listitem>
+            <para>matrixsynapse: Handle release of matrix-synapse 1.11 </para>
+          </listitem>
+          <listitem>
+            <para>setup: Fix regression to force-upgrade caused by Info changes </para>
+          </listitem>
+          <listitem>
+            <para>pagekite: Don't allow non-unique custom services </para>
+          </listitem>
+          <listitem>
+            <para>index: Reintroduce clients button in front page </para>
+          </listitem>
+          <listitem>
+            <para>upgrades: Don't ship apt backport preferences file </para>
+          </listitem>
+          <listitem>
+            <para>upgrades: Use internal scheduler instead of systemd timer </para>
+          </listitem>
+          <listitem>
+            <para>shadowsocks: Change default configuration </para>
+          </listitem>
+          <listitem>
+            <para>shadowsocks: Fix incorrect setting of state directory </para>
+          </listitem>
+          <listitem>
+            <para>shadowsocks: When editing configuration, don't re-enable </para>
+          </listitem>
+          <listitem>
+            <para>mediawiki: Don't allow anonymous edits </para>
+          </listitem>
+          <listitem>
+            <para>names: Fix Local Network Domain is not shown </para>
+          </listitem>
+          <listitem>
+            <para>shadowshocks: Fix setting configuration on Buster </para>
+          </listitem>
+          <listitem>
+            <para>locale: Update translations for Swedish, Spanish, and French </para>
+          </listitem>
+        </itemizedlist>
+      </section>
+      <section>
+        <title>FreedomBox 20.4 (2020-03-09)</title>
+        <itemizedlist>
+          <listitem>
+            <para>apache: Handle transition to php 7.4 </para>
+          </listitem>
+          <listitem>
+            <para>app: Fix showing app name in port forwarding information </para>
+          </listitem>
+          <listitem>
+            <para>apps: Do not show status block if service is running </para>
+          </listitem>
+          <listitem>
+            <para>i2p: New style app page layout </para>
+          </listitem>
+          <listitem>
+            <para>locale: Update translations for French, Telugu, Spanish, and Swedish </para>
+          </listitem>
+          <listitem>
+            <para>networks: Add first boot step for network topology wizard </para>
+          </listitem>
+          <listitem>
+            <para>networks: Add form for network topology </para>
+          </listitem>
+          <listitem>
+            <para>networks: Don't show router wizard if not behind a router </para>
+          </listitem>
+          <listitem>
+            <para>networks, firewall: Support newer version of policykit </para>
+          </listitem>
+          <listitem>
+            <para>networks: Fixes for networks wizards access and user experience </para>
+          </listitem>
+          <listitem>
+            <para>networks: If topology wizard is skipped, skip router wizard too </para>
+          </listitem>
+          <listitem>
+            <para>networks: Show router wizard before Internet connection type wizard </para>
+          </listitem>
+          <listitem>
+            <para>plinth: Increase sqlite busy timeout from default 5s to 30s </para>
+          </listitem>
+          <listitem>
+            <para>quassel: Fix unable to disable application without choosing a domain name </para>
+          </listitem>
+          <listitem>
+            <para>shadowsocks: Move user settings to state directory </para>
+          </listitem>
+          <listitem>
+            <para>storage: Directory selection form improvements </para>
+          </listitem>
+          <listitem>
+            <para>transmission: Allow to submit download directory if it is creatable </para>
+          </listitem>
+          <listitem>
+            <para>upgrades: Clean apt cache every week </para>
+          </listitem>
+          <listitem>
+            <para>views: Improve template security </para>
+          </listitem>
+        </itemizedlist>
+      </section>
+      <section>
+        <title>FreedomBox 20.3 (2020-02-24)</title>
+        <itemizedlist>
+          <listitem>
+            <para>apps: Update style for toggle button </para>
+          </listitem>
+          <listitem>
+            <para>apps: Drop border shadow for app icon in mobile view </para>
+          </listitem>
+          <listitem>
+            <para>apps: Show short description as secondary title </para>
+          </listitem>
+          <listitem>
+            <para>apps: Remove css filters and glow from app icons </para>
+          </listitem>
+          <listitem>
+            <para>cards: Remove the transition delay on hover effect </para>
+          </listitem>
+          <listitem>
+            <para>system: Implement new style for cards </para>
+          </listitem>
+          <listitem>
+            <para>framework: Generate secret key (existing sessions will get logged out) </para>
+          </listitem>
+          <listitem>
+            <para>framework: Cleanup expired sessions every week </para>
+          </listitem>
+          <listitem>
+            <para>networks: Add setting for internet connection type </para>
+          </listitem>
+          <listitem>
+            <para>networks: Ask about internet connection type during setup </para>
+          </listitem>
+          <listitem>
+            <para>shadowsocks: Fix shadowsocks not able to start </para>
+          </listitem>
+          <listitem>
+            <para>jsxc: Bypass issue with stronghold to get the app working again </para>
+          </listitem>
+          <listitem>
+            <para>monkeysphere: Fix regression with reading Apache configuration </para>
+          </listitem>
+          <listitem>
+            <para>help: Fix attribute on download manual button </para>
+          </listitem>
+          <listitem>
+            <para>firewall: Improve speed of some operations using DBus API </para>
+          </listitem>
+          <listitem>
+            <para>css: Add missing license identifier on some CSS files </para>
+          </listitem>
+          <listitem>
+            <para>deluge: Use safer method for editing configuration </para>
+          </listitem>
+          <listitem>
+            <para>deluge: More reliable initial configuration setup </para>
+          </listitem>
+          <listitem>
+            <para>samba: Add link to manual page </para>
+          </listitem>
+          <listitem>
+            <para>searx: Update search engines for 0.16.0 </para>
+          </listitem>
+          <listitem>
+            <para>openvpn: Fix spelling for Tunnelblick </para>
+          </listitem>
+          <listitem>
+            <para>bind: Show served domains </para>
+          </listitem>
+          <listitem>
+            <para>Update translations for German, Swedish, Italian, Spanish, Norwegian Bokmål, Hungarian, Polish, and French </para>
+          </listitem>
+        </itemizedlist>
+      </section>
+      <section>
+        <title>FreedomBox 20.2 (2020-02-10)</title>
+        <itemizedlist>
+          <listitem>
+            <para>networks: Support virtual Ethernet (veth) devices </para>
+          </listitem>
+          <listitem>
+            <para>diagnostics: Show firewall service status </para>
+          </listitem>
+          <listitem>
+            <para>storage: Show disks if FreedomBox is running in an unprivileged container </para>
+          </listitem>
+          <listitem>
+            <para>service: Stop service not before but after disabling it </para>
+          </listitem>
+          <listitem>
+            <para>users: Use more precise username validation </para>
+          </listitem>
+          <listitem>
+            <para>sso, users: Turn off autocapitalization on the username field </para>
+          </listitem>
+          <listitem>
+            <para>help: Fix anchor hidden under navbar </para>
+          </listitem>
+          <listitem>
+            <para>searx: Fix installation issue for 0.16.0 </para>
+          </listitem>
+          <listitem>
+            <para>firewall: Show Run Diagnostics button in app </para>
+          </listitem>
+          <listitem>
+            <para>glib: Introduce method to schedule an operation at regular intervals </para>
+          </listitem>
+          <listitem>
+            <para>notification: Show a drop down from main navbar for notifications </para>
+          </listitem>
+          <listitem>
+            <para>storage: Show low disk space warning using notifications API </para>
+          </listitem>
+          <listitem>
+            <para>upgrades: Show notification when FreedomBox is updated </para>
+          </listitem>
+          <listitem>
+            <para>security: Add Sandbox Coverage to report page </para>
+          </listitem>
+          <listitem>
+            <para>matrixsynapse: Enable systemd sandboxing </para>
+          </listitem>
+          <listitem>
+            <para>locale: Update translations for Telugu, French, Norwegian Bokmål, German, Spanish, and Swedish </para>
+          </listitem>
+        </itemizedlist>
+      </section>
+      <section>
         <title>FreedomBox 20.1 (2020-01-27)</title>
         <itemizedlist>
           <listitem>
@@ -10093,25 +10542,7 @@ wget https://www.thinkpenguin.com/files/ath9k_firmware_free-version/htc_7010.fw]
             <para>bind: Enable sandboxing for bind service </para>
           </listitem>
           <listitem>
-            <para>Translated using Weblate (Dutch) </para>
-          </listitem>
-          <listitem>
-            <para>Translated using Weblate (Norwegian Bokmål) </para>
-          </listitem>
-          <listitem>
-            <para>Translated using Weblate (German) </para>
-          </listitem>
-          <listitem>
-            <para>Translated using Weblate (Spanish) </para>
-          </listitem>
-          <listitem>
-            <para>Translated using Weblate (Swedish) </para>
-          </listitem>
-          <listitem>
-            <para>Translated using Weblate (French) </para>
-          </listitem>
-          <listitem>
-            <para>Translated using Weblate (Greek) </para>
+            <para>locale: Updated translations for Dutch, Norwegian Bokmål, German, Spanish, Swedish, French, and Greek </para>
           </listitem>
         </itemizedlist>
       </section>

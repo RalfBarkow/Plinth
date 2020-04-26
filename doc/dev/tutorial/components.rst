@@ -3,6 +3,41 @@
 Part 4: Components
 ------------------
 
+Each :class:`~plinth.app.App` contains various :class:`~plinth.app.Component`
+components that each provide one small functionality needed by the app. Each of
+these components are instantiated and added to the app as children.
+
+Providing basic information about the app
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We need to provide some basic information about the application for the app to
+function normally.
+
+.. code-block:: python3
+
+  from plinth import app as app_module
+
+  class TransmissionApp(app_module.App):
+      ...
+
+      def __init__(self):
+        ...
+
+        info = app_module.Info(app_id=self.app_id, version=1,
+                               name=_('Transmission'),
+                               icon_filename='transmission',
+                               short_description=_('BitTorrent Web Client'),
+                               description=description,
+                               manual_page='Transmission', clients=clients)
+        self.add(info)
+
+The first argument is app_id that is same as the ID for the app. The version is
+the version number for this app that must be incremented whenever setup() method
+needs to be called again. name, icon_filename, short_description, description,
+manual_page and clients provide information that is shown on the app's main
+page. More information the parameters is available in :class:`~plinth.app.Info`
+class documentation.
+
 Managing a daemon
 ^^^^^^^^^^^^^^^^^
 
@@ -128,11 +163,19 @@ with the FreedomBox framework in ``__init.py__``.
 
 .. code-block:: python3
 
-  group = ('bit-torrent', 'Download files using BitTorrent applications')
+  from plinth.modules.users.components import UsersAndGroups
 
-  def init():
+  class TransmissionApp(app_module.App):
       ...
-      register_group(group)
+
+      def __init__(self):
+          ...
+
+          groups = { 'bit-torrent': _('Download files using BitTorrent applications') }
+          users_and_groups = UsersAndGroups('users-and-groups-transmission',
+                                            groups=groups)
+          self.add(users_and_groups)
+
 
 Then in the Apache configuration snippet, we can mandate that only users of this
 group (and, of course, admin users) should be allowed to access our app. In the

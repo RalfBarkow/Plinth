@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Main FreedomBox views.
 """
@@ -22,6 +7,7 @@ import time
 
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
+from django.http import Http404, HttpResponseBadRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.http import is_safe_url
@@ -30,8 +16,7 @@ from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from stronghold.decorators import public
 
-from plinth import package
-from plinth.app import App
+from plinth import app, package
 from plinth.daemon import app_is_running
 from plinth.modules.config import get_advanced_mode
 from plinth.translation import get_language_from_request, set_language
@@ -39,6 +24,16 @@ from plinth.translation import get_language_from_request, set_language
 from . import forms, frontpage
 
 REDIRECT_FIELD_NAME = 'next'
+
+
+def _get_redirect_url_from_param(request):
+    """Return the redirect URL from 'next' GET/POST param."""
+    redirect_to = request.GET.get(REDIRECT_FIELD_NAME, '')
+    redirect_to = request.POST.get(REDIRECT_FIELD_NAME, redirect_to)
+    if is_safe_url(url=redirect_to, allowed_hosts={request.get_host()}):
+        return redirect_to
+
+    return reverse('index')
 
 
 @public
@@ -52,9 +47,6 @@ def index(request):
         shortcut for shortcut in shortcuts if shortcut.component_id == selected
     ]
     selected_shortcut = selected_shortcut[0] if selected_shortcut else None
-
-    from plinth.modules.storage import views as disk_views
-    disk_views.warn_about_low_disk_space(request)
 
     return TemplateResponse(
         request, 'index.html', {
@@ -77,8 +69,6 @@ class AppsIndexView(TemplateView):
 
 def system_index(request):
     """Serve the system index page."""
-    from plinth.modules.storage import views as disk_views
-    disk_views.warn_about_low_disk_space(request)
     return TemplateResponse(request, 'system.html',
                             {'advanced_mode': get_advanced_mode()})
 
@@ -100,39 +90,63 @@ class LanguageSelectionView(FormView):
 
     def get_success_url(self):
         """Return the URL in the next parameter or home page."""
-        redirect_to = self.request.GET.get(REDIRECT_FIELD_NAME, '')
-        redirect_to = self.request.POST.get(REDIRECT_FIELD_NAME, redirect_to)
-        if is_safe_url(url=redirect_to,
-                       allowed_hosts={self.request.get_host()}):
-            return redirect_to
-
-        return reverse('index')
+        return _get_redirect_url_from_param(self.request)
 
 
 class AppView(FormView):
-    """A generic view for configuring simple apps."""
-    clients = []
-    name = None
-    # List of paragraphs describing the service
-    description = ""
-    form_class = forms.AppForm
-    # Display the 'status' block of the app.html template
-    # This block uses information from service.is_running. This method is
-    # optional, so allow not showing this block here.
-    show_status_block = True
+    """A generic view for showing an app's main page.
+
+    The view and it's template may be customized but by default show the
+    following:
+
+    * Icon for the app
+    * Name of the app
+    * Description of the app
+    * Link to the manual page for the app
+    * A button to enable/disable the app
+    * A toolbar with common actions such as 'Run diagnostics'
+    * A status section showing the running status of the app
+    * A form for configuring the app
+
+    The following class properties are available on the view:
+
+    'app_id' is the mandatory property to set the ID of the app. It is used to
+    retrieve the App instance for the app that is needed for basic information
+    and operations such as enabling/disabling the app.
+
+    'form_class' is the Django form class that is used by this view. It may be
+    None if the app does not have a configuration form. Default is None.
+
+    'template_name' is the template used to render this view. By default it is
+    app.html. It may be overridden with a template that derives from app.html
+    to customize the appearance of the app to achieve more complex presentation
+    instead of the simple appearance provided by default.
+
+    'port_forwarding_info' is a list of port information dictionaries that can
+    used to show a special section in the app page that tells the users how to
+    forward ports on their router for this app to work properly.
+
+    """
+    form_class = None
     app_id = None
     template_name = 'app.html'
-    manual_page = ''
     port_forwarding_info = None
-    icon_filename = ''
 
     def __init__(self, *args, **kwargs):
         """Initialize the view."""
         super().__init__(*args, **kwargs)
         self._common_status = None
 
-        if not self.name:
-            raise ImproperlyConfigured('Missing name attribute')
+    def post(self, request, *args, **kwargs):
+        """Handle app enable/disable button separately."""
+        if 'app_enable_disable_button' not in request.POST:
+            return super().post(request, *args, **kwargs)
+
+        form = forms.AppEnableDisableForm(data=self.request.POST)
+        if form.is_valid():
+            return self.enable_disable_form_valid(form)
+
+        return HttpResponseBadRequest('Invalid form submission')
 
     @property
     def success_url(self):
@@ -144,7 +158,18 @@ class AppView(FormView):
         if not self.app_id:
             raise ImproperlyConfigured('Missing attribute: app_id')
 
-        return App.get(self.app_id)
+        return app.App.get(self.app_id)
+
+    def get_form(self, *args, **kwargs):
+        """Return an instance of this view's form.
+
+        Also the form_class for this view to be None.
+
+        """
+        if not self.form_class:
+            return None
+
+        return super().get_form(*args, **kwargs)
 
     def _get_common_status(self):
         """Return the status needed for form and template.
@@ -161,43 +186,52 @@ class AppView(FormView):
 
     def get_initial(self):
         """Return the status of the app to fill in the form."""
-        return self._get_common_status()
+        initial = super().get_initial()
+        initial.update(self._get_common_status())
+        return initial
 
     def form_valid(self, form):
         """Enable/disable a service and set messages."""
-        old_status = form.initial
-        new_status = form.cleaned_data
-
-        if old_status['is_enabled'] == new_status['is_enabled']:
-            # TODO: find a more reliable/official way to check whether the
-            # request has messages attached.
-            if not self.request._messages._queued_messages:
-                messages.info(self.request, _('Setting unchanged'))
-        else:
-            if new_status['is_enabled']:
-                self.app.enable()
-                messages.success(self.request, _('Application enabled'))
-            else:
-                self.app.disable()
-                messages.success(self.request, _('Application disabled'))
+        if not self.request._messages._queued_messages:
+            messages.info(self.request, _('Setting unchanged'))
 
         return super().form_valid(form)
+
+    def get_enable_disable_form(self):
+        """Return an instance of the app enable/disable form.
+
+        If the app can't be disabled by the user, return None.
+
+        """
+        if not self.app.can_be_disabled:
+            return None
+
+        initial = {
+            'should_enable': not self._get_common_status()['is_enabled']
+        }
+        return forms.AppEnableDisableForm(initial=initial)
+
+    def enable_disable_form_valid(self, form):
+        """Form handling for enabling / disabling apps."""
+        should_enable = form.cleaned_data['should_enable']
+        if should_enable != self.app.is_enabled():
+            if should_enable:
+                self.app.enable()
+            else:
+                self.app.disable()
+
+        return HttpResponseRedirect(self.request.path)
 
     def get_context_data(self, *args, **kwargs):
         """Add service to the context data."""
         context = super().get_context_data(*args, **kwargs)
         context.update(self._get_common_status())
-        context['app'] = self.app
         context['app_id'] = self.app.app_id
         context['is_running'] = app_is_running(self.app)
-        context['clients'] = self.clients
-        context['name'] = self.name
-        context['description'] = self.description
+        context['app_info'] = self.app.info
         context['has_diagnostics'] = self.app.has_diagnostics()
-        context['show_status_block'] = self.show_status_block
-        context['manual_page'] = self.manual_page
         context['port_forwarding_info'] = self.port_forwarding_info
-        context['icon_filename'] = self.icon_filename
+        context['app_enable_disable_form'] = self.get_enable_disable_form()
 
         from plinth.modules.firewall.components import Firewall
         context['firewall'] = self.app.get_components_of_type(Firewall)
@@ -208,15 +242,13 @@ class AppView(FormView):
 class SetupView(TemplateView):
     """View to prompt and setup applications."""
     template_name = 'setup.html'
-    name = 'None'
-    # List of paragraphs describing the service
-    description = []
 
     def get_context_data(self, **kwargs):
         """Return the context data rendering the template."""
         context = super(SetupView, self).get_context_data(**kwargs)
         setup_helper = self.kwargs['setup_helper']
         context['setup_helper'] = setup_helper
+        context['app_info'] = setup_helper.module.app.info
 
         # Reuse the value of setup_state throughout the view for consistency.
         context['setup_state'] = setup_helper.get_state()
@@ -226,9 +258,6 @@ class SetupView(TemplateView):
         if not context['setup_current_operation']:
             context[
                 'package_manager_is_busy'] = package.is_package_manager_busy()
-
-        context['name'] = self.name
-        context['description'] = self.description
 
         return context
 
@@ -254,3 +283,15 @@ class SetupView(TemplateView):
                 return self.render_to_response(self.get_context_data())
 
         return super(SetupView, self).dispatch(request, *args, **kwargs)
+
+
+def notification_dismiss(request, id):
+    """Dismiss a notification."""
+    from .notification import Notification
+    notes = Notification.list(key=id, user=request.user)
+    if not notes:
+        raise Http404
+
+    notes[0].dismiss()
+
+    return HttpResponseRedirect(_get_redirect_url_from_param(request))

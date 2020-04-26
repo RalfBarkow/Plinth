@@ -6,6 +6,7 @@ Components
 .. toctree::
    :caption: Available components:
 
+   info
    menu
    daemon
    firewall
@@ -13,6 +14,7 @@ Components
    frontpage
    domain
    letsencrypt
+   staticfiles
 
 Base Classes
 ^^^^^^^^^^^^

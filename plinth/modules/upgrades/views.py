@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app for upgrades.
 """
@@ -22,7 +7,6 @@ from django.contrib import messages
 from django.template.response import TemplateResponse
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext as _
-from django.views.generic.edit import FormView
 
 from plinth import actions
 from plinth.errors import ActionError
@@ -38,10 +22,6 @@ class UpgradesConfigurationView(AppView):
     success_url = reverse_lazy('upgrades:index')
     template_name = "upgrades_configure.html"
     app_id = 'upgrades'
-    name = upgrades.name
-    description = upgrades.description
-    manual_page = upgrades.manual_page
-    show_status_block = False
 
     def get_initial(self):
         return {'auto_upgrades_enabled': upgrades.is_enabled()}
@@ -71,10 +51,8 @@ class UpgradesConfigurationView(AppView):
             else:
                 messages.success(self.request,
                                  _('Automatic upgrades disabled'))
-        else:
-            messages.info(self.request, _('Settings unchanged'))
 
-        return FormView.form_valid(self, form)
+        return super().form_valid(form)
 
 
 def is_package_manager_busy():

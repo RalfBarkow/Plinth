@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app to configure Mumble server.
 """
@@ -25,34 +10,23 @@ from plinth import app as app_module
 from plinth import frontpage, menu
 from plinth.daemon import Daemon
 from plinth.modules.firewall.components import Firewall
+from plinth.modules.users.components import UsersAndGroups
 
 from .manifest import backup, clients  # noqa, pylint: disable=unused-import
 
 version = 1
 
-name = _('Mumble')
-
-icon_filename = 'mumble'
-
-short_description = _('Voice Chat')
-
 managed_services = ['mumble-server']
 
 managed_packages = ['mumble-server']
 
-description = [
+_description = [
     _('Mumble is an open source, low-latency, encrypted, high quality '
       'voice chat software.'),
     _('You can connect to your Mumble server on the regular Mumble port '
       '64738. <a href="http://mumble.info">Clients</a> to connect to Mumble '
       'from your desktop and Android devices are available.')
 ]
-
-clients = clients
-
-reserved_usernames = ['mumble-server']
-
-manual_page = 'Mumble'
 
 port_forwarding_info = [
     ('TCP', 64738),
@@ -70,18 +44,26 @@ class MumbleApp(app_module.App):
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-mumble', name, short_description, 'mumble',
-                              'mumble:index', parent_url_name='apps')
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               name=_('Mumble'), icon_filename='mumble',
+                               short_description=_('Voice Chat'),
+                               description=_description, manual_page='Mumble',
+                               clients=clients)
+        self.add(info)
+
+        menu_item = menu.Menu('menu-mumble', info.name, info.short_description,
+                              'mumble', 'mumble:index', parent_url_name='apps')
         self.add(menu_item)
 
         shortcut = frontpage.Shortcut(
-            'shortcut-mumble', name, short_description=short_description,
-            icon=icon_filename, description=description,
-            configure_url=reverse_lazy('mumble:index'), clients=clients)
+            'shortcut-mumble', info.name,
+            short_description=info.short_description, icon=info.icon_filename,
+            description=info.description,
+            configure_url=reverse_lazy('mumble:index'), clients=info.clients)
         self.add(shortcut)
 
-        firewall = Firewall('firewall-mumble', name, ports=['mumble-plinth'],
-                            is_external=True)
+        firewall = Firewall('firewall-mumble', info.name,
+                            ports=['mumble-plinth'], is_external=True)
         self.add(firewall)
 
         daemon = Daemon(
@@ -89,6 +71,10 @@ class MumbleApp(app_module.App):
             listen_ports=[(64738, 'tcp4'), (64738, 'tcp6'), (64738, 'udp4'),
                           (64738, 'udp6')])
         self.add(daemon)
+
+        users_and_groups = UsersAndGroups('users-and-groups-mumble',
+                                          reserved_usernames=['mumble-server'])
+        self.add(users_and_groups)
 
 
 def init():

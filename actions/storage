@@ -1,20 +1,5 @@
 #!/usr/bin/python3
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Configuration helper for disks manager.
 """
@@ -348,6 +333,9 @@ def subcommand_usage_info(_):
 
 def subcommand_validate_directory(arguments):
     """Validate a directory"""
+    if os.geteuid() == 0:
+        raise RuntimeError('You must not be root to run this command')
+
     directory = arguments.path
 
     def part_exists(path):
@@ -364,14 +352,15 @@ def subcommand_validate_directory(arguments):
         if not os.path.exists(directory):
             # doesn't exist
             print('ValidationError: 1')
+            return
 
     if not os.path.isdir(directory):
         # is not a directory
         print('ValidationError: 2')
-    if not os.access(directory, os.R_OK):
+    elif not os.access(directory, os.R_OK):
         # is not readable
         print('ValidationError: 3')
-    if arguments.check_writable or arguments.check_creatable:
+    elif arguments.check_writable or arguments.check_creatable:
         if not os.access(directory, os.W_OK):
             # is not writable
             print('ValidationError: 4')

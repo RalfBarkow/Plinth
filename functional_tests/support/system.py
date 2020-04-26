@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 import tempfile
 from urllib.parse import urlparse
@@ -95,7 +80,7 @@ def set_language(browser, language_code):
 
 def check_language(browser, language_code):
     nav_to_module(browser, 'config')
-    return browser.find_by_css('.header-bar').first.find_by_tag(
+    return browser.find_by_css('.app-titles').first.find_by_tag(
         'h2').first.value == config_page_title_language_map[language_code]
 
 
@@ -272,12 +257,6 @@ def download_file_logged_in(browser, url, suffix=''):
     return temp_file.name
 
 
-def pagekite_is_enabled(browser):
-    """Return whether pagekite is enabled."""
-    nav_to_module(browser, 'pagekite')
-    return browser.find_by_id('app-toggle-input').checked
-
-
 def pagekite_configure(browser, host, port, kite_name, kite_secret):
     """Configure pagekite basic parameters."""
     nav_to_module(browser, 'pagekite')
@@ -286,7 +265,7 @@ def pagekite_configure(browser, host, port, kite_name, kite_secret):
     browser.fill('pagekite-server_port', str(port))
     browser.fill('pagekite-kite_name', kite_name)
     browser.fill('pagekite-kite_secret', kite_secret)
-    submit(browser)
+    submit(browser, form_class='form-configuration')
 
 
 def pagekite_get_configuration(browser):

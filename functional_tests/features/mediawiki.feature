@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 @apps @mediawiki @backups
 Feature: MediaWiki Wiki Engine
@@ -70,13 +55,13 @@ Scenario: Logged in user can see upload files option
 
 Scenario: Upload images
   Given the mediawiki application is enabled
-  When I upload an image named FreedomBox-logo-lineart.png to mediawiki with credentials admin and whatever123
-  Then there should be FreedomBox-logo-lineart.png image
+  When I upload an image named noise.png to mediawiki with credentials admin and whatever123
+  Then there should be Noise.png image
 
 Scenario: Upload SVG image
   Given the mediawiki application is enabled
-  When I upload an image named FreedomBox-logo-grayscale.svg to mediawiki with credentials admin and whatever123
-  Then there should be FreedomBox-logo-grayscale.svg image
+  When I upload an image named apps-background.svg to mediawiki with credentials admin and whatever123
+  Then there should be Apps-background.svg image
 
 Scenario: Backup and restore mediawiki
   Given the mediawiki application is enabled

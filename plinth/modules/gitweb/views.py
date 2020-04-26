@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Django views for Gitweb.
 """
@@ -37,14 +22,8 @@ from .forms import CreateRepoForm, EditRepoForm
 class GitwebAppView(views.AppView):
     """Serve configuration page."""
 
-    clients = gitweb.clients
-    name = gitweb.name
-    description = gitweb.description
     app_id = 'gitweb'
-    show_status_block = False
     template_name = 'gitweb_configure.html'
-    icon_filename = gitweb.icon_filename
-    manual_page = gitweb.manual_page
 
     def get_context_data(self, *args, **kwargs):
         """Add repositories to the context data."""
@@ -81,11 +60,15 @@ class CreateRepoView(SuccessMessageMixin, FormView):
         try:
             gitweb.create_repo(form_data['name'], form_data['description'],
                                form_data['owner'], form_data['is_private'])
-        except ActionError:
+        except ActionError as error:
+            self.success_message = ''
+            error_text = error.args[2].split('\n')[0]
             messages.error(
-                self.request,
-                _('An error occurred while creating the repository.'))
-        gitweb.app.update_service_access()
+                self.request, "{0} {1}".format(
+                    _('An error occurred while creating the repository.'),
+                    error_text))
+        else:
+            gitweb.app.update_service_access()
 
         return super().form_valid(form)
 
@@ -163,6 +146,6 @@ def delete(request, name):
         return redirect(reverse_lazy('gitweb:index'))
 
     return TemplateResponse(request, 'gitweb_delete.html', {
-        'title': gitweb.name,
+        'title': gitweb.app.info.name,
         'name': name
     })

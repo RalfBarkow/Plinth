@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 from contextlib import contextmanager
 import time
@@ -38,12 +23,12 @@ def get_service_module(service_name):
 
 def is_running(browser, service_name):
     interface.nav_to_module(browser, get_service_module(service_name))
-    return len(browser.find_by_css('.running-status.active')) != 0
+    return len(browser.find_by_id('service-not-running')) == 0
 
 
 def is_not_running(browser, service_name):
     interface.nav_to_module(browser, get_service_module(service_name))
-    return len(browser.find_by_css('.running-status.inactive')) != 0
+    return len(browser.find_by_id('service-not-running')) != 0
 
 
 def eventually(function, args=[], timeout=30):

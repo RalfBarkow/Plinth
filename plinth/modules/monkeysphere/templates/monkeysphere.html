@@ -1,21 +1,6 @@
 {% extends "app.html" %}
 {% comment %}
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 {% endcomment %}
 
 {% load bootstrap %}
@@ -40,11 +25,11 @@
         padding: 0;
     }
 
-    .form.pull-right {
+    .form-action.pull-right {
         margin-right: 10px;
     }
 
-    .form button {
+    .form-action button {
         width: 9em;
     }
   </style>
@@ -135,7 +120,8 @@
           </td>
           <td>
             {% if not key.openpgp_fingerprint %}
-              <form class="form pull-right form-import" method="post"
+              <form class="form pull-right form-action form-import"
+                    method="post"
                     action="{% url 'monkeysphere:import' key.ssh_fingerprint %}">
                 {% csrf_token %}
 
@@ -144,7 +130,8 @@
               </form>
             {% else %}
               {% if not running %}
-                <form class="form pull-right form-publish" method="post"
+                <form class="form pull-right form-action form-publish"
+                      method="post"
                       action="{% url 'monkeysphere:publish' key.openpgp_fingerprint %}">
                   {% csrf_token %}
 
@@ -153,7 +140,8 @@
                 </form>
               {% endif %}
               {% if key.importable_domains %}
-                <form class="form pull-right form-add-domain" method="post"
+                <form class="form pull-right form-action form-add-domain"
+                      method="post"
                       action="{% url 'monkeysphere:import' key.ssh_fingerprint %}">
                   {% csrf_token %}
 

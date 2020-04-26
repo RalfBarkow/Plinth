@@ -1,27 +1,14 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app for help pages.
 """
 
+import os
+
 from django.utils.translation import ugettext_lazy as _
 
-from plinth import menu
-from plinth.app import App
+from plinth import app as app_module
+from plinth import cfg, menu, web_server
 
 version = 1
 
@@ -29,7 +16,7 @@ is_essential = True
 app = None
 
 
-class HelpApp(App):
+class HelpApp(app_module.App):
     """FreedomBox app for showing help."""
 
     app_id = 'help'
@@ -37,6 +24,11 @@ class HelpApp(App):
     def __init__(self):
         """Create components for the app."""
         super().__init__()
+
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               is_essential=is_essential)
+        self.add(info)
+
         menu_item = menu.Menu('menu-help', _('Documentation'), None, 'fa-book',
                               'help:index', parent_url_name='index')
         self.add(menu_item)
@@ -60,6 +52,17 @@ class HelpApp(App):
                               'help:about', parent_url_name='help:index',
                               order=100)
         self.add(menu_item)
+
+        directory_map = {}
+        langs = os.listdir(os.path.join(cfg.doc_dir, 'manual'))
+        for lang in langs:
+            manual_dir = os.path.join(cfg.doc_dir, 'manual', lang, 'images')
+            manual_url = f'/help/manual/{lang}/images'
+            directory_map[manual_url] = manual_dir
+
+        static_files = web_server.StaticFiles('static-files-help',
+                                              directory_map)
+        self.add(static_files)
 
 
 def init():

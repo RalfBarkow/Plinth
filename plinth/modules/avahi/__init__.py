@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app for service discovery.
 """
@@ -29,7 +14,6 @@ from plinth.modules.firewall.components import Firewall
 from plinth.modules.names.components import DomainType
 from plinth.signals import domain_added, domain_removed, post_hostname_change
 from plinth.utils import format_lazy
-from plinth.views import AppView
 
 from .manifest import backup  # noqa, pylint: disable=unused-import
 
@@ -39,13 +23,13 @@ version = 1
 
 is_essential = True
 
+depends = ['names']
+
 managed_services = ['avahi-daemon']
 
 managed_packages = ['avahi-daemon', 'avahi-utils']
 
-name = _('Service Discovery')
-
-description = [
+_description = [
     format_lazy(
         _('Service discovery allows other devices on the network to '
           'discover your {box_name} and services running on it.  It '
@@ -69,7 +53,14 @@ class AvahiApp(app_module.App):
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-avahi', name, None, 'fa-compass',
+
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               name=_('Service Discovery'), icon='fa-compass',
+                               description=_description,
+                               manual_page='ServiceDiscovery')
+        self.add(info)
+
+        menu_item = menu.Menu('menu-avahi', info.name, None, info.icon,
                               'avahi:index', parent_url_name='system')
         self.add(menu_item)
 
@@ -78,7 +69,7 @@ class AvahiApp(app_module.App):
                                  can_have_certificate=False)
         self.add(domain_type)
 
-        firewall = Firewall('firewall-avahi', name, ports=['mdns'],
+        firewall = Firewall('firewall-avahi', info.name, ports=['mdns'],
                             is_external=False)
         self.add(firewall)
 
@@ -119,10 +110,3 @@ def on_post_hostname_change(sender, old_hostname, new_hostname, **kwargs):
                                name=old_hostname + '.local')
     domain_added.send_robust(sender='avahi', domain_type='domain-type-local',
                              name=new_hostname + '.local', services='__all__')
-
-
-class AvahiAppView(AppView):
-    app_id = 'avahi'
-    name = name
-    description = description
-    manual_page = manual_page

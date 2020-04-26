@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 import pytest
 import splinter
@@ -46,6 +31,12 @@ def ntp_is_enabled(session_browser):
 @given(parsers.parse('the network time application is disabled'))
 def ntp_is_disabled(session_browser):
     application.disable(session_browser, 'ntp')
+
+
+@given(parsers.parse('the network time application can be disabled'))
+def ntp_can_be_disabled(session_browser):
+    if not application.can_be_disabled(session_browser, 'ntp'):
+        pytest.skip(f'network time application can\'t be disabled')
 
 
 @when(parsers.parse('I set the time zone to {time_zone:S}'))
