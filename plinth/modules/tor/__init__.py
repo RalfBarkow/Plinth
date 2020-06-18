@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app to configure Tor.
 """
@@ -29,12 +14,13 @@ from plinth.daemon import Daemon, diagnose_netcat, diagnose_port_listening
 from plinth.modules.apache.components import diagnose_url
 from plinth.modules.firewall.components import Firewall
 from plinth.modules.names.components import DomainType
+from plinth.modules.users.components import UsersAndGroups
 from plinth.signals import domain_added, domain_removed
 
 from . import utils
 from .manifest import backup, clients  # noqa, pylint: disable=unused-import
 
-version = 4
+version = 5
 
 depends = ['names']
 
@@ -44,11 +30,7 @@ managed_packages = [
 
 managed_services = ['tor@plinth']
 
-name = _('Tor')
-
-short_description = _('Anonymity Network')
-
-description = [
+_description = [
     _('Tor is an anonymous communication system. You can learn more '
       'about it from the <a href="https://www.torproject.org/">Tor '
       'Project</a> website. For best protection when web surfing, the '
@@ -57,15 +39,7 @@ description = [
       'Tor Browser</a>.')
 ]
 
-clients = clients
-
-reserved_usernames = ['debian-tor']
-
-manual_page = 'Tor'
-
 app = None
-
-icon_filename = 'tor'
 
 
 class TorApp(app_module.App):
@@ -76,8 +50,16 @@ class TorApp(app_module.App):
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-tor', name, short_description, 'tor',
-                              'tor:index', parent_url_name='apps')
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               name=_('Tor'), icon_filename='tor',
+                               short_description=_('Anonymity Network'),
+                               description=_description, manual_page='Tor',
+                               clients=clients)
+        self.add(info)
+
+        menu_item = menu.Menu('menu-tor', info.name, info.short_description,
+                              info.icon_filename, 'tor:index',
+                              parent_url_name='apps')
         self.add(menu_item)
 
         domain_type = DomainType('domain-type-tor', _('Tor Onion Service'),
@@ -98,6 +80,10 @@ class TorApp(app_module.App):
             listen_ports=[(9050, 'tcp4'), (9050, 'tcp6'), (9040, 'tcp4'),
                           (9040, 'tcp6'), (9053, 'udp4'), (9053, 'udp6')])
         self.add(daemon)
+
+        users_and_groups = UsersAndGroups('users-and-groups-tor',
+                                          reserved_usernames=['debian-tor'])
+        self.add(users_and_groups)
 
     def diagnose(self):
         """Run diagnostics and return the results."""

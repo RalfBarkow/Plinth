@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Test module for component managing system daemons and other systemd units.
 """
@@ -44,12 +29,14 @@ def test_initialization():
     assert daemon.unit == 'test-unit'
     assert not daemon.strict_check
     assert daemon.listen_ports == []
+    assert daemon.alias is None
 
     listen_ports = [(345, 'tcp4'), (123, 'udp')]
     daemon = Daemon('test-daemon', 'test-unit', strict_check=True,
-                    listen_ports=listen_ports)
+                    listen_ports=listen_ports, alias='test-unit-2')
     assert daemon.strict_check
     assert daemon.listen_ports == listen_ports
+    assert daemon.alias == 'test-unit-2'
 
 
 @patch('plinth.action_utils.service_is_enabled')
@@ -75,6 +62,13 @@ def test_enable(superuser_run, daemon):
     daemon.enable()
     superuser_run.assert_has_calls([call('service', ['enable', 'test-unit'])])
 
+    daemon.alias = 'test-unit-2'
+    daemon.enable()
+    superuser_run.assert_has_calls([
+        call('service', ['enable', 'test-unit']),
+        call('service', ['enable', 'test-unit-2'])
+    ])
+
 
 @patch('plinth.actions.superuser_run')
 def test_disable(superuser_run, daemon):
@@ -98,6 +92,7 @@ def test_is_running(service_is_running, daemon):
 @patch('plinth.daemon.diagnose_port_listening')
 def test_diagnose(port_listening, service_is_running, daemon):
     """Test running diagnostics."""
+
     def side_effect(port, kind):
         return [f'test-result-{port}-{kind}', 'passed']
 

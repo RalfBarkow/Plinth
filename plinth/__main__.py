@@ -1,27 +1,12 @@
 #!/usr/bin/python3
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
 import argparse
 import importlib
 import logging
 import sys
 
-from . import (__version__, cfg, dbus, frontpage, log, menu, module_loader,
+from . import (__version__, cfg, frontpage, glib, log, menu, module_loader,
                setup, utils, web_framework, web_server)
 
 if utils.is_axes_old():
@@ -130,7 +115,7 @@ def adapt_config(arguments):
 def on_web_server_stop():
     """Stop all other threads since web server is trying to exit."""
     setup.stop()
-    dbus.stop()
+    glib.stop()
 
 
 def main():
@@ -178,7 +163,7 @@ def main():
 
     setup.run_setup_in_background()
 
-    dbus.run()
+    glib.run()
 
     web_server.init()
     web_server.run(on_web_server_stop)

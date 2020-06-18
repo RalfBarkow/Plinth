@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app for configuring OpenVPN server.
 """
@@ -23,64 +8,45 @@ import logging
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.template.response import TemplateResponse
 from django.utils.translation import ugettext as _
 from django.views.decorators.http import require_POST
 
-from plinth import actions, daemon
+from plinth import actions
 from plinth.modules import config, openvpn
-
-from .forms import OpenVpnForm
+from plinth.views import AppView
 
 logger = logging.getLogger(__name__)
 
-setup_process = None
 
+class OpenVPNAppView(AppView):
+    """Show OpenVPN app main page."""
+    app_id = 'openvpn'
+    template_name = 'openvpn.html'
+    port_forwarding_info = openvpn.port_forwarding_info
 
-def index(request):
-    """Serve configuration page."""
-    status = get_status()
+    def dispatch(self, request, *args, **kwargs):
+        """Collect the result of running setup process."""
+        if bool(openvpn.setup_process):
+            _collect_setup_result(request)
 
-    if status['setup_running']:
-        _collect_setup_result(request)
+        return super().dispatch(request, *args, **kwargs)
 
-    form = None
-
-    if request.method == 'POST':
-        form = OpenVpnForm(request.POST, prefix='openvpn')
-        # pylint: disable=E1101
-        if form.is_valid():
-            _apply_changes(request, status, form.cleaned_data)
-            status = get_status()
-            form = OpenVpnForm(initial=status, prefix='openvpn')
-    else:
-        form = OpenVpnForm(initial=status, prefix='openvpn')
-
-    return TemplateResponse(
-        request, 'openvpn.html', {
-            'app_id': 'openvpn',
-            'clients': openvpn.clients,
-            'name': openvpn.name,
-            'description': openvpn.description,
-            'manual_page': openvpn.manual_page,
-            'port_forwarding_info': openvpn.port_forwarding_info,
-            'status': status,
-            'form': form,
-            'show_status_block': True,
-            'is_running': status['is_running'],
-            'has_diagnostics': True,
-            'is_enabled': status['enabled'],
-            'icon_filename': openvpn.icon_filename
-        })
+    def get_context_data(self, *args, **kwargs):
+        """Add additional context data for template."""
+        context = super().get_context_data(*args, **kwargs)
+        context['status'] = {
+            'is_setup': openvpn.is_setup(),
+            'setup_running': bool(openvpn.setup_process),
+        }
+        return context
 
 
 @require_POST
 def setup(request):
     """Start the setup process."""
-    global setup_process
-    if not openvpn.is_setup() and not setup_process:
-        setup_process = actions.superuser_run('openvpn', ['setup'],
-                                              run_in_background=True)
+    if not openvpn.is_setup() and not openvpn.setup_process:
+        openvpn.setup_process = actions.superuser_run('openvpn', ['setup'],
+                                                      run_in_background=True)
 
     openvpn.app.enable()
 
@@ -106,24 +72,12 @@ def profile(request):
     return response
 
 
-def get_status():
-    """Get the current settings from OpenVPN server."""
-
-    return {
-        'is_setup': openvpn.is_setup(),
-        'setup_running': bool(setup_process),
-        'enabled': openvpn.app.is_enabled(),
-        'is_running': daemon.app_is_running(openvpn.app)
-    }
-
-
 def _collect_setup_result(request):
     """Handle setup process is completion."""
-    global setup_process
-    if not setup_process:
+    if not openvpn.setup_process:
         return
 
-    return_code = setup_process.poll()
+    return_code = openvpn.setup_process.poll()
 
     # Setup process is not complete yet
     if return_code is None:
@@ -134,22 +88,4 @@ def _collect_setup_result(request):
     else:
         messages.info(request, _('Setup failed.'))
 
-    setup_process = None
-
-
-def _apply_changes(request, old_status, new_status):
-    """Apply the changes."""
-    modified = False
-
-    if old_status['enabled'] != new_status['enabled']:
-        if new_status['enabled']:
-            openvpn.app.enable()
-        else:
-            openvpn.app.disable()
-
-        modified = True
-
-    if modified:
-        messages.success(request, _('Configuration updated'))
-    else:
-        messages.info(request, _('Setting unchanged'))
+    openvpn.setup_process = None

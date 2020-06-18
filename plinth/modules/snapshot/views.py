@@ -1,26 +1,13 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Views for snapshot module.
 """
 
 import json
+import urllib.parse
 
 from django.contrib import messages
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
@@ -50,12 +37,10 @@ subsubmenu = [
 def not_supported_view(request):
     """Show that snapshots are not supported on the system."""
     template_data = {
-        'title': snapshot_module.name,
-        'name': snapshot_module.name,
-        'description': snapshot_module.description,
+        'app_info': snapshot_module.app.info,
+        'title': snapshot_module.app.info.name,
         'fs_type': storage.get_filesystem_type(),
         'fs_types_supported': snapshot_module.fs_types_supported,
-        'manual_page': snapshot_module.manual_page,
     }
     return TemplateResponse(request, 'snapshot_not_supported.html',
                             template_data)
@@ -78,10 +63,8 @@ def index(request):
 
     return TemplateResponse(
         request, 'snapshot.html', {
-            'title': snapshot_module.name,
-            'name': snapshot_module.name,
-            'description': snapshot_module.description,
-            'manual_page': snapshot_module.manual_page,
+            'app_info': snapshot_module.app.info,
+            'title': snapshot_module.app.info.name,
             'subsubmenu': subsubmenu,
             'form': form
         })
@@ -97,22 +80,26 @@ def manage(request):
             actions.superuser_run('snapshot', ['create'])
             messages.success(request, _('Created snapshot.'))
         if 'delete_selected' in request.POST:
-            if request.POST.getlist('snapshot_list'):
-                snapshot_to_delete = request.POST.getlist('snapshot_list')
-                request.session['snapshots'] = snapshot_to_delete
-                return redirect(reverse('snapshot:delete-selected'))
+            to_delete = request.POST.getlist('snapshot_list')
+            if to_delete:
+                # Send values using GET params instead of session variables so
+                # that snapshots can be deleted even when disk is full.
+                params = [('snapshots', number) for number in to_delete]
+                params = urllib.parse.urlencode(params)
+                url = reverse('snapshot:delete-selected')
+                return HttpResponseRedirect(f'{url}?{params}')
 
     output = actions.superuser_run('snapshot', ['list'])
     snapshots = json.loads(output)
-    has_deletable_snapshots = any(
-        [snapshot for snapshot in snapshots[1:] if not snapshot['is_default']])
+    has_deletable_snapshots = any([
+        snapshot for snapshot in snapshots
+        if not snapshot['is_default'] and not snapshot['is_active']
+    ])
 
     return TemplateResponse(
         request, 'snapshot_manage.html', {
-            'title': snapshot_module.name,
-            'name': snapshot_module.name,
-            'description': snapshot_module.description,
-            'manual_page': snapshot_module.manual_page,
+            'title': snapshot_module.app.info.name,
+            'app_info': snapshot_module.app.info,
             'snapshots': snapshots,
             'has_deletable_snapshots': has_deletable_snapshots,
             'subsubmenu': subsubmenu,
@@ -121,6 +108,7 @@ def manage(request):
 
 def update_configuration(request, old_status, new_status):
     """Update configuration of snapshots."""
+
     def make_config(args):
         key, stamp = args[0], args[1]
         if old_status[key] != new_status[key]:
@@ -163,39 +151,44 @@ def update_configuration(request, old_status, new_status):
 
 
 def delete_selected(request):
+    """View to delete selected snapshots."""
+    if request.method == 'POST':
+        to_delete = set(request.POST.getlist('snapshots'))
+    else:
+        to_delete = set(request.GET.getlist('snapshots'))
+
+    if not to_delete:
+        return redirect(reverse('snapshot:manage'))
+
     output = actions.superuser_run('snapshot', ['list'])
     snapshots = json.loads(output)
+    snapshots_to_delete = [
+        snapshot for snapshot in snapshots if snapshot['number'] in to_delete
+        and not snapshot['is_active'] and not snapshot['is_default']
+    ]
 
     if request.method == 'POST':
-        if 'snapshots' in request.session:
-            to_delete = request.session['snapshots']
-            try:
-                if to_delete == len(snapshots):
-                    actions.superuser_run('snapshot', ['delete_all'])
-                    messages.success(request, _('Deleted all snapshots'))
-                else:
-                    for snapshot in to_delete:
-                        actions.superuser_run('snapshot', ['delete', snapshot])
-                    messages.success(request, _('Deleted selected snapshots'))
-            except ActionError as exception:
-                if 'Config is in use.' in exception.args[2]:
-                    messages.error(
-                        request,
-                        _('Snapshot is currently in use. '
-                          'Please try again later.'))
-                else:
-                    raise
+        try:
+            for snapshot in snapshots_to_delete:
+                actions.superuser_run('snapshot',
+                                      ['delete', snapshot['number']])
 
-            return redirect(reverse('snapshot:manage'))
+            messages.success(request, _('Deleted selected snapshots'))
+        except ActionError as exception:
+            if 'Config is in use.' in exception.args[2]:
+                messages.error(
+                    request,
+                    _('Snapshot is currently in use. '
+                      'Please try again later.'))
+            else:
+                raise
 
-    if 'snapshots' in request.session:
-        data = request.session['snapshots']
-        to_delete = list(filter(lambda x: x['number'] in data, snapshots))
+        return redirect(reverse('snapshot:manage'))
 
-        return TemplateResponse(request, 'snapshot_delete_selected.html', {
-            'title': _('Delete Snapshots'),
-            'snapshots': to_delete
-        })
+    return TemplateResponse(request, 'snapshot_delete_selected.html', {
+        'title': _('Delete Snapshots'),
+        'snapshots': snapshots_to_delete
+    })
 
 
 def rollback(request, number):

@@ -3,22 +3,7 @@
 {% load plinth_extras %}
 
 {% comment %}
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 {% endcomment %}
 <!doctype html>
 <!--[if lt IE 7 ]> <html class="ie ie6 no-js" lang="en"> <![endif]-->
@@ -39,7 +24,6 @@
   maximum-scale = 1.0 retains dimensions instead of zooming in if page width < device width
   -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="turbolinks-cache-control" content="no-preview">
 
   <!-- R2D2, you know better than to trust a strange computer! -->
   <meta name="robots" content="noindex, nofollow, noarchive" />
@@ -70,10 +54,7 @@
   <!-- Bootstrap base CSS -->
   <link rel="stylesheet" href="{% static '/javascript/bootstrap/css/bootstrap.min.css' %}"/>
   <link rel="stylesheet" href="{% static '/javascript/fork-awesome/css/fork-awesome.css' %}"/>
-  <link rel="stylesheet" href="{% static 'theme/css/plinth.css' %}"/>
-  <link rel="stylesheet" href="{% static 'theme/css/responsive.css' %}"/>
-  <!-- Local link to system Turbolinks JS -->
-  <script type="text/javascript" src="{% static '/javascript/turbolinks/turbolinks.js' %}" defer></script>
+  <link rel="stylesheet" href="{% static 'theme/css/main.css' %}"/>
   <!-- Local link to system Modernizr (includes HTML5 Shiv) -->
   <script type="text/javascript" src="{% static '/javascript/modernizr/modernizr.min.js' %}" defer></script>
   <!-- Local link to system jQuery -->
@@ -98,6 +79,11 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
+
+        <ul class="nav navbar-nav">
+          {% include "notifications-dropdown.html" %}
+        </ul>
+
         {% block mainmenu_left %}
           <a href="{% url 'index' %}"  class="navbar-brand
                    {% if not submenu.url %} menu_link_active {% else %}
@@ -143,7 +129,11 @@
           {% block mainmenu_right %}
 
             {% if user.is_authenticated %}
+
+              {% include "notifications-dropdown.html" %}
+
               {% include "help-menu.html" %}
+
               <li class="dropdown">
                 <a href="{% url 'users:edit' request.user.username %}"
                    class="dropdown-toggle" data-toggle="dropdown"
@@ -215,8 +205,9 @@
             {% endif %}
           {% endblock %}
         </ul>
-
       </div>
+
+      {% include "notifications.html" %}
     </div>
   </div>
 

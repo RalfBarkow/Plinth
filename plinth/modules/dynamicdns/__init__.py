@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app to configure ez-ipupdate client.
 """
@@ -26,6 +11,7 @@ from plinth import cfg, menu
 from plinth.modules.names.components import DomainType
 from plinth.signals import domain_added
 from plinth.utils import format_lazy
+from plinth.modules.users.components import UsersAndGroups
 
 from .manifest import backup  # noqa, pylint: disable=unused-import
 
@@ -37,9 +23,7 @@ depends = ['names']
 
 managed_packages = ['ez-ipupdate']
 
-name = _('Dynamic DNS Client')
-
-description = [
+_description = [
     format_lazy(
         _('If your Internet provider changes your IP address periodically '
           '(i.e. every 24h), it may be hard for others to find you on the '
@@ -55,10 +39,6 @@ description = [
       'name, they will get a response with your current IP address.')
 ]
 
-reserved_usernames = ['ez-ipupd']
-
-manual_page = 'DynamicDNS'
-
 app = None
 
 
@@ -70,7 +50,14 @@ class DynamicDNSApp(app_module.App):
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-dynamicdns', name, None, 'fa-refresh',
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               is_essential=is_essential, depends=depends,
+                               name=_('Dynamic DNS Client'), icon='fa-refresh',
+                               description=_description,
+                               manual_page='DynamicDNS')
+        self.add(info)
+
+        menu_item = menu.Menu('menu-dynamicdns', info.name, None, info.icon,
                               'dynamicdns:index', parent_url_name='system')
         self.add(menu_item)
 
@@ -78,6 +65,10 @@ class DynamicDNSApp(app_module.App):
                                  _('Dynamic Domain Name'), 'dynamicdns:index',
                                  can_have_certificate=True)
         self.add(domain_type)
+
+        users_and_groups = UsersAndGroups('users-and-groups-dynamicdns',
+                                          reserved_usernames=['ez-ipupd'])
+        self.add(users_and_groups)
 
 
 def init():

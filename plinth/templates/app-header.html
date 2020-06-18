@@ -1,0 +1,58 @@
+{% comment %}
+# SPDX-License-Identifier: AGPL-3.0-or-later
+{% endcomment %}
+
+{% load bootstrap %}
+{% load i18n %}
+{% load static %}
+
+<header class="app-header {% if not app_info.icon_filename %} app-header-single-column {% endif %}">
+
+  {% if app_info.icon_filename %}
+
+    <img src="{% static 'theme/icons/' %}{{ app_info.icon_filename }}.svg" alt="{{ app_info.name  }}"/>
+
+  {% endif %}
+
+  <section class="app-description" >
+    <section class='app-titles'>
+      {% block pagetitle %}
+        <div>
+          {% if setup %}
+            <h2>{% trans "Installation" %}: {{ app_info.name }}</h2>
+          {% else %}
+            <h2>{{ app_info.name }}</h2>
+          {% endif %}
+          {% if app_info.short_description %}
+            <h3>{{ app_info.short_description }}</h3>
+          {% endif %}
+        </div>
+      {% endblock %}
+      {% if app_enable_disable_form %}
+        <form class="form form-app-enable-disable" method="post">
+          {% csrf_token %}
+
+          {{ app_enable_disable_form }}
+
+          <button name="app_enable_disable_button" type="submit"
+            class="btn toggle-button {{ is_enabled|yesno:'toggle-button--toggled,' }}">
+          </button>
+        </form>
+      {% endif %}
+    </section>
+
+    {% block description %}
+      {% for paragraph in app_info.description %}
+        <p>{{ paragraph|safe }}</p>
+      {% endfor %}
+    {% endblock %}
+
+    {% if app_info.manual_page %}
+      <p class="manual-page">
+        <a href="{% url 'help:manual-page' lang='-' page=app_info.manual_page %}">
+          {% trans 'Learn more...' %}
+        </a>
+      </p>
+    {% endif %}
+  </section>
+</header>

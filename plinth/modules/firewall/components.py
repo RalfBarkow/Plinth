@@ -1,24 +1,10 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 App component for other apps to use firewall functionality.
 """
 
 import logging
+import re
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -66,7 +52,10 @@ class Firewall(app.FollowerComponent):
     def enable(self):
         """Open firewall ports when the component is enabled."""
         super().enable()
+        firewall.try_with_reload(self._enable)
 
+    def _enable(self):
+        """Open firewall ports."""
         internal_enabled_ports = firewall.get_enabled_services(zone='internal')
         external_enabled_ports = firewall.get_enabled_services(zone='external')
 
@@ -81,7 +70,10 @@ class Firewall(app.FollowerComponent):
     def disable(self):
         """Close firewall ports when the component is disabled."""
         super().disable()
+        firewall.try_with_reload(self._disable)
 
+    def _disable(self):
+        """Close firewall ports."""
         internal_enabled_ports = firewall.get_enabled_services(zone='internal')
         external_enabled_ports = firewall.get_enabled_services(zone='external')
 
@@ -109,8 +101,16 @@ class Firewall(app.FollowerComponent):
 
     @staticmethod
     def get_internal_interfaces():
-        """Returns a list of interfaces in a firewall zone."""
-        return firewall.get_interfaces('internal')
+        """Returns a list of interfaces in a firewall zone.
+
+        Filter out tun interfaces as they are always assumed to be internal
+        interfaces.
+
+        """
+        return [
+            interface for interface in firewall.get_interfaces('internal')
+            if not re.fullmatch(r'tun\d+', interface)
+        ]
 
     def diagnose(self):
         """Check if the firewall ports are open and only as expected.
@@ -123,12 +123,15 @@ class Firewall(app.FollowerComponent):
         external_ports = firewall.get_enabled_services(zone='external')
         for port_detail in self.ports_details:
             port = port_detail['name']
+            details = ', '.join(
+                (f'{port_number}/{protocol}'
+                 for port_number, protocol in port_detail['details']))
 
             # Internal zone
             result = 'passed' if port in internal_ports else 'failed'
             message = _(
                 'Port {name} ({details}) available for internal networks'
-            ).format(name=port, details=port_detail['details'])
+            ).format(name=port, details=details)
             results.append([message, result])
 
             # External zone
@@ -136,12 +139,12 @@ class Firewall(app.FollowerComponent):
                 result = 'passed' if port in external_ports else 'failed'
                 message = _(
                     'Port {name} ({details}) available for external networks'
-                ).format(name=port, details=port_detail['details'])
+                ).format(name=port, details=details)
             else:
                 result = 'passed' if port not in external_ports else 'failed'
                 message = _(
                     'Port {name} ({details}) unavailable for external networks'
-                ).format(name=port, details=port_detail['details'])
+                ).format(name=port, details=details)
 
             results.append([message, result])
 

@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Python action utility functions.
 """
@@ -33,6 +18,12 @@ UWSGI_AVAILABLE_PATH = '/etc/uwsgi/apps-available/{config_name}.ini'
 def is_systemd_running():
     """Return if we are running under systemd."""
     return os.path.exists('/run/systemd')
+
+
+def service_daemon_reload():
+    """Reload systemd to ensure that newer unit files are read."""
+    subprocess.run(['systemctl', 'daemon-reload'], check=True,
+                   stdout=subprocess.DEVNULL)
 
 
 def service_is_running(servicename):
@@ -84,11 +75,11 @@ def service_enable(service_name):
 
 def service_disable(service_name):
     """Disable and stop service in systemd and sysvinit using update-rc.d."""
+    subprocess.call(['systemctl', 'disable', service_name])
     try:
         service_stop(service_name)
     except subprocess.CalledProcessError:
         pass
-    subprocess.call(['systemctl', 'disable', service_name])
 
 
 def service_unmask(service_name):

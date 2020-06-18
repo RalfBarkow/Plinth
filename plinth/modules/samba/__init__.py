@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app to configure samba.
 """
@@ -32,7 +17,7 @@ from plinth import app as app_module
 from plinth import frontpage, menu
 from plinth.daemon import Daemon
 from plinth.modules.firewall.components import Firewall
-from plinth.modules.users import register_group
+from plinth.modules.users.components import UsersAndGroups
 from plinth.utils import format_lazy
 
 from .manifest import backup, clients  # noqa, pylint: disable=unused-import
@@ -43,13 +28,7 @@ managed_services = ['smbd', 'nmbd']
 
 managed_packages = ['samba', 'acl']
 
-name = _('Samba')
-
-icon_filename = 'samba'
-
-short_description = _('File Sharing')
-
-description = [
+_description = [
     _('Samba allows to share files and folders between FreedomBox and '
       'other computers in your local network.'),
     format_lazy(
@@ -65,10 +44,6 @@ description = [
       'own private space.'),
 ]
 
-group = ('freedombox-share', _('Access to the private shares'))
-
-clients = clients
-
 app = None
 
 
@@ -80,18 +55,30 @@ class SambaApp(app_module.App):
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-samba', name, short_description, 'samba',
-                              'samba:index', parent_url_name='apps')
+
+        groups = {'freedombox-share': _('Access to the private shares')}
+
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               name=_('Samba'), icon_filename='samba',
+                               short_description=_('Network File Storage'),
+                               manual_page='Samba', description=_description,
+                               clients=clients)
+        self.add(info)
+
+        menu_item = menu.Menu('menu-samba', info.name, info.short_description,
+                              info.icon_filename, 'samba:index',
+                              parent_url_name='apps')
         self.add(menu_item)
 
         shortcut = frontpage.Shortcut(
-            'shortcut-samba', name, short_description=short_description,
-            icon=icon_filename, description=description,
-            configure_url=reverse_lazy('samba:index'), clients=clients,
-            login_required=True, allowed_groups=[group[0]])
+            'shortcut-samba', info.name,
+            short_description=info.short_description, icon=info.icon_filename,
+            description=info.description,
+            configure_url=reverse_lazy('samba:index'), clients=info.clients,
+            login_required=True, allowed_groups=list(groups))
         self.add(shortcut)
 
-        firewall = Firewall('firewall-samba', name, ports=['samba'])
+        firewall = Firewall('firewall-samba', info.name, ports=['samba'])
         self.add(firewall)
 
         daemon = Daemon(
@@ -106,12 +93,15 @@ class SambaApp(app_module.App):
 
         self.add(daemon_nmbd)
 
+        users_and_groups = UsersAndGroups('users-and-groups-samba',
+                                          groups=groups)
+        self.add(users_and_groups)
+
 
 def init():
     """Initialize the module."""
     global app
     app = SambaApp()
-    register_group(group)
 
     setup_helper = globals()['setup_helper']
     if setup_helper.get_state() != 'needs-setup' and app.is_enabled():

@@ -1,29 +1,15 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Setup CherryPy web server.
 """
 
 import logging
 import os
+import warnings
 
 import cherrypy
 
-from . import cfg, log, module_loader, web_framework
+from . import app, cfg, log, module_loader, web_framework
 
 logger = logging.getLogger(__name__)
 
@@ -71,13 +57,6 @@ def init():
 
     _mount_static_directory('/usr/share/javascript', '/javascript')
 
-    langs = os.listdir(os.path.join(cfg.doc_dir, 'manual'))
-    for lang in langs:
-        manual_dir = os.path.join(cfg.doc_dir, 'manual', lang, 'images')
-        manual_url = '/'.join([cfg.server_dir, f'help/manual/{lang}/images']) \
-                        .replace('//', '/')
-        _mount_static_directory(manual_dir, manual_url)
-
     for module_name, module in module_loader.loaded_modules.items():
         module_path = os.path.dirname(module.__file__)
         static_dir = os.path.join(module_path, 'static')
@@ -87,11 +66,74 @@ def init():
         urlprefix = "%s%s" % (web_framework.get_static_url(), module_name)
         _mount_static_directory(static_dir, urlprefix)
 
+    for component in StaticFiles.list():
+        component.mount()
+
     cherrypy.engine.signal_handler.subscribe()
 
 
 def run(on_web_server_stop):
     """Start the web server and block it until exit."""
-    cherrypy.engine.start()
+    with warnings.catch_warnings():
+        # Suppress warning that some of the static directories don't exist.
+        # Since there is no way to add/remove those tree mounts at will, we
+        # need to add them all before hand even if they don't exist now. If the
+        # directories becomes available later, CherryPy serves them just fine.
+        warnings.filterwarnings(
+            'ignore', '(.|\n)*is not an existing filesystem path(.|\n)*',
+            UserWarning)
+        cherrypy.engine.start()
+
     cherrypy.engine.subscribe('stop', on_web_server_stop)
     cherrypy.engine.block()
+
+
+class StaticFiles(app.FollowerComponent):
+    """Component to serve static files shipped with an app.
+
+    Any files in <app>/static directory will be automatically served on
+    /static/<app>/ directory by FreedomBox. This allows each app to ship custom
+    static files that are served by the web server.
+
+    However, in some rare circumstances, a system folder will need to be served
+    on a path for the app to work. This component allows declaring such
+    directories and the web paths they should be served on.
+
+    """
+
+    _all_instances = {}
+
+    def __init__(self, component_id, directory_map=None):
+        """Initialize the component.
+
+        component_id should be a unique ID across all components of an app and
+        across all components.
+
+        directory_map should be a dictionary with keys to be web paths and
+        values to be absolute path of the directory on disk to serve. The
+        static files from the directory are served over the given web path. The
+        web path will be prepended with the FreedomBox's configured base web
+        path. For example, {'/foo': '/usr/share/foo'} means that
+        '/usr/share/foo/bar.png' will be served over '/plinth/foo/bar.png' if
+        FreedomBox is configured to be served on '/plinth'.
+
+        """
+        super().__init__(component_id)
+        self.directory_map = directory_map
+        self._all_instances[component_id] = self
+
+    @classmethod
+    def list(cls):
+        """Return a list of all instances."""
+        return cls._all_instances.values()
+
+    def mount(self):
+        """Perform configuration of the web server to handle static files.
+
+        Called by web server abstraction layer after web server has been setup.
+
+        """
+        if self.directory_map:
+            for web_path, file_path in self.directory_map.items():
+                web_path = '%s%s' % (cfg.server_dir, web_path)
+                _mount_static_directory(file_path, web_path)

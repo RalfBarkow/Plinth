@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Utilities for performing application setup operations.
 """
@@ -498,18 +483,20 @@ class ForceUpgrader():
             raise self.TemporaryFailure('Package manager is busy')
 
         apps = self._get_list_of_apps_to_force_upgrade()
-        logger.info('Apps needing conffile upgrades: %s',
-                    ', '.join([str(app.name) for app in apps]) or 'None')
+        logger.info(
+            'Apps needing conffile upgrades: %s',
+            ', '.join([str(app.app.info.name) for app in apps]) or 'None')
 
         need_retry = False
         for app, packages in apps.items():
             try:
-                logger.info('Force upgrading app: %s', app.name)
+                logger.info('Force upgrading app: %s', app.app.info.name)
                 if app.force_upgrade(app.setup_helper, packages):
                     logger.info('Successfully force upgraded app: %s',
-                                app.name)
+                                app.app.info.name)
                 else:
-                    logger.info('Ignored force upgrade for app: %s', app.name)
+                    logger.info('Ignored force upgrade for app: %s',
+                                app.app.info.name)
             except Exception as exception:
                 logger.exception('Error running force upgrade: %s', exception)
                 need_retry = True

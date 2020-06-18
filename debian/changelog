@@ -1,3 +1,733 @@
+plinth (20.11) unstable; urgency=medium
+
+  [ Thomas Vincent ]
+  * Translated using Weblate (French)
+
+  [ Petter Reinholdtsen ]
+  * Translated using Weblate (Norwegian Bokmål)
+
+  [ Michael Breidenbach ]
+  * Translated using Weblate (German)
+  * Translated using Weblate (Swedish)
+
+  [ Sunil Mohan Adapa ]
+  * *: Remove use of Turbolinks library
+  * web_framework: Reduce verbosity of DB migration process
+  * container: Add script to manage systemd-nspawn containers for dev.
+  * container: Fix upgrading of freedombox
+  * matrixsynapse: Handle upgrade to versions 1.15.x
+
+  [ James Valleroy ]
+  * upgrades: Don't enable backports on Debian derivatives
+  * upgrades: Use a custom service for manual update
+  * locale: Update translation strings
+  * doc: Fetch latest manual
+  * debian: Update renamed lintian tag
+
+  [ Ralf Barkow ]
+  * Translated using Weblate (German)
+
+  [ aiman an ]
+  * Added translation using Weblate (Arabic (Saudi Arabia))
+  * Translated using Weblate (Arabic (Saudi Arabia))
+
+  [ WaldiS ]
+  * Translated using Weblate (Polish)
+
+  [ Luis A. Arizmendi ]
+  * Translated using Weblate (Spanish)
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Mon, 15 Jun 2020 19:55:45 -0400
+
+plinth (20.10) unstable; urgency=high
+
+  [ Joseph Nuthalapati ]
+  * backups: Add optional field - Name
+  * functional-tests: Use Name attribute in backups
+  * functional-tests: Move @backups to Scenario level
+  * functional-tests: Leave tor+http test disabled
+  * tests: functional: Document running tests in parallel
+  * tests: functional: Add pytest-xdist to install.sh
+
+  [ Sunil Mohan Adapa ]
+  * openvpn: Use app toggle button and common app view
+  * tests: functional: Merge into main source hierarchy
+  * storage: Fix failing path validation unit tests
+  * tests: functional: cosmetic: flake8 fixes
+  * tests: functional: Re-organize step definitions and helper methods
+  * coturn: Fix functional test for backup/restore
+  * ttrss: Fix functional tests
+  * snapshot: Fix functional test to account for non-removable snapshots
+  * test: functional: Fix for Apache restart after domain change
+  * tor: Fix problems with running a relay
+  * mldonkey: Add app to freedombox-share group
+  * samba: Add clients information
+  * cockpit: Promote for advanced storage/firewalld/networking ops
+  * firewall: Mention that internal services are available over VPN
+  * firewall: Don't show tun interface in internal zone warning
+  * minidlna: Add link to manual page
+  * minidlna: Fix i18n for name of the app
+  * pagekite: Fix expired certificates causing connection failures
+
+  [ Luis A. Arizmendi ]
+  * Translated using Weblate (Spanish)
+
+  [ Etienne ]
+  * Translated using Weblate (French)
+
+  [ Artem ]
+  * Translated using Weblate (Russian)
+
+  [ fred1m ]
+  * ikiwiki: Enable 'attachment' plugin by default
+
+  [ James Valleroy ]
+  * utils: Handle removal of axes.get_version()
+  * debian: Mark doc packages as Multi-Arch: foreign
+  * firewall: Minor spelling fix
+  * radicale: Fix link in description to clients
+  * users: Avoid error when user's groups cannot be parsed
+  * templates: Fix setup state check
+  * locale: Update translation strings
+  * doc: Fetch latest manual
+
+  [ Allan Nordhøy ]
+  * Translated using Weblate (Norwegian Bokmål)
+  * Translated using Weblate (Czech)
+  * Translated using Weblate (Hungarian)
+  * Translated using Weblate (Greek)
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Mon, 01 Jun 2020 20:06:53 -0400
+
+plinth (20.9) unstable; urgency=medium
+
+  [ Petter Reinholdtsen ]
+  * Translated using Weblate (Norwegian Bokmål)
+
+  [ James Valleroy ]
+  * snapshot: Set as essential module
+  * functional_tests: snapshot: Skip delete all when there are no snapshots
+  * quassel: Use systemd sandboxing features
+  * minidlna: Move sysctl config to /etc/sysctl.d/50-freedombox.conf
+  * upgrades: Add needrestart to restart services as needed
+  * upgrades: Enable Automatic-Reboot option of unattended-upgrades
+  * locale: Update translation strings
+  * doc: Fetch latest manual
+
+  [ Michael Breidenbach ]
+  * Translated using Weblate (German)
+  * Translated using Weblate (Swedish)
+
+  [ Fioddor Superconcentrado ]
+  * Folder remained unrenamed. Should have changed along with git links.
+
+  [ Sunil Mohan Adapa ]
+  * snapshot: Fix issues with restore and delete
+  * performance: Add basic functional tests
+  * daemon: Allow using an alias when enabling a daemon
+  * bind: Add daemon alias for bind9 -> named
+  * daemon: bind: cosmetic: yapf, isort formatting
+  * firewall: Reload firewalld so it works with newly installed services
+  * glib: Allow scheduling non-repeating tasks in separate threads
+  * notification: Expand and clarify restriction on id property
+  * storage: Auto-mount disks, notify of failing disks
+  * package: Fix error log when checking if package manager is busy
+  * power: cosmetic: Fix flake8 warnings
+  * first_setup: Fix regression with logo not showing
+  * minidlna: cosmetic: isort fixes
+  * mediawiki: Stop jobrunner during backup/restore
+  * minidlna: Stop daemon during backup/restore
+  * mumble: Stop server during backup/restore
+  * quassel: Fix stopping server during backup/restore
+  * tor: Fix stopping server during backup/restore
+  * upgrades: Always schedule a reboot at 02:00 local time
+  * upgrades: Add information about service restart and system reboot
+  * performance: Launch the Cockpit graphs directly if possible
+
+  [ Joseph Nuthalapati ]
+  * samba: Change description to Network File Storage
+  * functional-tests: Skip network setup wizard
+  * functional-tests: Move Disable tests to the end
+
+  [ fred1m ]
+  * performance: Add app for system monitoring
+
+  [ Luis A. Arizmendi ]
+  * Translated using Weblate (Spanish)
+
+  [ Artem ]
+  * Translated using Weblate (Russian)
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Mon, 18 May 2020 19:42:49 -0400
+
+plinth (20.8) unstable; urgency=medium
+
+  [ Luis A. Arizmendi ]
+  * Translated using Weblate (Spanish)
+  * Translated using Weblate (Spanish)
+
+  [ Joseph Nuthalapati ]
+  * Translated using Weblate (Telugu)
+  * Translated using Weblate (Telugu)
+  * HACKING: More detailed instructions for VirtualBox
+  * HACKING: Correction to macOS package manager name
+
+  [ Nektarios Katakis ]
+  * syncthing: add to freedombox-share group
+
+  [ Veiko Aasa ]
+  * users: Try-restart service after service is added to the sharing group
+  * datetime: Handle timesyncd service runs conditionally
+  * minidlna: Add functional tests that enable and disable application
+  * minidlna: Make app installable inside unprivileged container
+
+  [ Sunil Mohan Adapa ]
+  * web_server: Suppress warnings that static directories don't exist
+  * debian: Remove timer to setup repositories properly
+  * static: Use SVG logo during first wizard welcome step
+  * static: Reduce the size of the background noise image
+  * mediawiki: Reuse existing images in functional tests
+  * setup.py: Don't install/ship .po files
+  * static: Don't ship visual design file and unused images
+  * storage: Fix tests by wrestling with auto-mounting of disks
+  * HACKING: Minor indentation fix
+  * *: Update links to repository and project page
+  * ci: Update link to container in Docker registry
+  * coturn: New app to manage Coturn TURN/STUN server
+  * datetime: Refactor handling systemd-timesyncd not running in VMs
+  * datetime: Don't expect synced time in diagnostics inside VMs
+  * mediawiki: Partial fix for installing on testing
+  * datetime: Disable diagnostics when no tests are available
+
+  [ James Valleroy ]
+  * d/copyright: Fix path to visual_design
+  * data: Print hostname and IP addresses before console login
+  * snapshot: Fix message when not available
+  * snapshot: Fix title
+  * locale: Update translation strings
+  * debian: Use debhelper compat level 13
+  * doc: Fetch latest manual
+
+  [ Artem ]
+  * Translated using Weblate (Russian)
+
+  [ nautilusx ]
+  * Translated using Weblate (German)
+
+  [ Fioddor Superconcentrado ]
+  * Directions to install VirtualBox when it's not part of the Debian-based
+    distro, like Buster.
+
+  [ Anonymous ]
+  * Translated using Weblate (Spanish)
+
+  [ Nathan ]
+  * Translated using Weblate (French)
+
+  [ Michael Breidenbach ]
+  * Translated using Weblate (Swedish)
+
+  [ fred1m ]
+  * mumble: Add Mumla to the list of clients
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Mon, 04 May 2020 20:33:35 -0400
+
+plinth (20.7) unstable; urgency=medium
+
+  [ Coucouf ]
+  * Translated using Weblate (French)
+
+  [ vihor ]
+  * Translated using Weblate (Serbian)
+
+  [ Localisation Lab ]
+  * Translated using Weblate (French)
+
+  [ Joseph Nuthalapati ]
+  * Translated using Weblate (Telugu)
+
+  [ Veiko Aasa ]
+  * gitweb: Improve error handling when creating repository
+
+  [ James Valleroy ]
+  * upgrades: Allow installation of python3-twisted from backports
+  * matrixsynapse: Handle upgrade to 1.12.*
+  * locale: Update translation strings
+  * doc: Fetch latest manual
+
+  [ Fioddor Superconcentrado ]
+  * HACKING: Clarify where commands should be run
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Mon, 20 Apr 2020 18:38:52 -0400
+
+plinth (20.6.1) unstable; urgency=medium
+
+  [ James Valleroy ]
+  * users: Fix regression where form help_text line was dropped
+  * debian: Add firmware-ath9k-htc to Recommends
+  * doc: Fetch latest manual
+
+  [ Allan Nordhøy ]
+  * gitweb: Use proper ellipsis char when showing clone progress
+  * Translated using Weblate (Norwegian Bokmål)
+  * Translated using Weblate (German)
+
+  [ Coucouf ]
+  * Translated using Weblate (French)
+  * Translated using Weblate (French)
+
+  [ Manuela Silva ]
+  * Translated using Weblate (Portuguese)
+
+  [ nautilusx ]
+  * Translated using Weblate (German)
+
+  [ Jeannette L ]
+  * Translated using Weblate (German)
+  * Translated using Weblate (French)
+  * Translated using Weblate (Italian)
+
+  [ wind ]
+  * Translated using Weblate (Russian)
+
+  [ vihor ]
+  * Translated using Weblate (Serbian)
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Sat, 11 Apr 2020 09:56:43 -0400
+
+plinth (20.6) unstable; urgency=medium
+
+  [ wind ]
+  * Translated using Weblate (Russian)
+
+  [ Thomas Vincent ]
+  * Translated using Weblate (French)
+  * Translated using Weblate (French)
+
+  [ Alice Kile ]
+  * app: Separate app enable/disable form from config form
+
+  [ Sunil Mohan Adapa ]
+  * pagekite: Fix functional tests
+  * monkeysphere: Making styling more specific to avoid interference
+  * networks: Make styling more specific to avoid interference
+  * syncthing: Update description to mention 'syncthing' group
+
+  [ Michael Breidenbach ]
+  * Translated using Weblate (German)
+
+  [ Coucouf ]
+  * Translated using Weblate (French)
+  * Translated using Weblate (French)
+  * Translated using Weblate (French)
+  * Translated using Weblate (French)
+  * Translated using Weblate (French)
+  * Translated using Weblate (French)
+  * Translated using Weblate (French)
+  * Translated using Weblate (French)
+  * Translated using Weblate (French)
+
+  [ Pavel Borecki ]
+  * Translated using Weblate (Czech)
+
+  [ James Valleroy ]
+  * radicale: Support upgrade to any 2.x version
+  * packages: Mark freedombox package as held during package installs
+  * packages: Keep existing hold if already set
+  * locale: Update translation strings
+  * doc: Fetch latest manual
+  * debian: Cleanup overrides for jsxc symlinks
+
+  [ Allan Nordhøy ]
+  * Translated using Weblate (German)
+  * Translated using Weblate (French)
+  * Translated using Weblate (Italian)
+  * Translated using Weblate (Hindi)
+
+  [ Joseph Nuthalapati ]
+  * users: Add component for managing users and groups
+  * yapf: Update conf to add blank line before nested class/def
+  * cosmetic: Minor yapf and other fixes
+  * app: Fix grammar in developer documentation string
+  * ikiwiki: Disable edits. Add moderation of comments
+  * Translated using Weblate (Telugu)
+  * vagrant: Skip upgrading freedombox dependencies
+  * firewalld: Force upgrade anything in [0.7, 0.9)
+  * infinoted: Fix permissions of sync directory
+
+  [ vihor ]
+  * Added translation using Weblate (Serbian)
+  * Translated using Weblate (Serbian)
+
+  [ Luis A. Arizmendi ]
+  * Translated using Weblate (Spanish)
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Mon, 06 Apr 2020 20:40:17 -0400
+
+plinth (20.5.1) unstable; urgency=medium
+
+  [ Petter Reinholdtsen ]
+  * Translated using Weblate (Norwegian Bokmål)
+
+  [ Allan Nordhøy ]
+  * networks: Update label wording in topology form: Choose → Specify
+  * Translated using Weblate (Norwegian Bokmål)
+
+  [ Sunil Mohan Adapa ]
+  * web_server: Introduce component to handle special static file dirs
+  * jsxc: Fix issue with serving static files
+  * help: Move custom static file handling into app from central place
+  * debian: Update doc-base to include PDF
+  * debian: Prepare for multiple binary packages
+  * debian: Separate binary packages for each language manual
+  * debian: Remove outdated TODO file
+
+  [ Michael Breidenbach ]
+  * Translated using Weblate (German)
+
+  [ James Valleroy ]
+  * debian: Correct doc package names in Recommends
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Thu, 26 Mar 2020 09:13:13 -0400
+
+plinth (20.5) unstable; urgency=medium
+
+  [ Joseph Nuthalapati ]
+  * ci: Use pre-built container image to speed up CI
+  * ci: Add maintenance script for updating images
+  * ci: Optimize refreshing Docker image for GitLabCI
+
+  [ James Valleroy ]
+  * ci: Switch docker image to testing
+  * Translated using Weblate (Swedish)
+  * locale: Update translation strings
+  * doc: Fetch latest manual
+
+  [ Sunil Mohan Adapa ]
+  * app: Fix name of the block in templates, used for overriding
+  * views: Allow AppViews to set self.intial
+  * pagekite: Simplify code for form adding custom service
+  * pagekite: Remove unused templates
+  * pagekite: Drop ineffective base template
+  * pagekite: Minor cleanup
+  * pagekite: Merge all the configuration retrieval actions
+  * pagekite: Merge set-kite and set-frontend actions
+  * pagekite: Use Daemon component to simplify handling daemon actions
+  * pagekite: Don't signal new domain on init if app is disabled
+  * pagekite: Simplify code notifying domain name changes
+  * pagekite: Don't attempt to notify about domain if app is disabled
+  * pagekite: Remove app enabled checking from getting configuration
+  * pagekite: Fix functional tests by submitting the right form
+  * pagekite: Fix styling issues for custom services section
+  * pagekite: On enable/disable, add/remove domain from names module
+  * pagekite: Fix an error message in custom services form
+  * pagekite: Ensure transitioning for from old code
+  * matrixsynapse: Handle release of matrix-synapse 1.11
+  * setup: Fix regression to force-upgrade caused by Info changes
+  * pagekite: Don't allow non-unique custom services
+  * toolbar: Factor out the clients buttons into a separate template
+  * index: Reintroduce clients button in front page
+  * upgrades: Don't ship apt backport preferences file
+  * setup.py: Remove files shipped in the past
+  * upgrades: Use internal scheduler instead of systemd timer
+  * shadowsocks: Change default configuration
+  * action_utils: Add utility to call systemd daemon-reload
+  * shadowsocks: Fix incorrect setting of state directory
+  * shadowsocks: When editing configuration, don't re-enable
+  * mediawiki: Don't allow anonymous edits
+
+  [ Fioddor Superconcentrado ]
+  * Translated using Weblate (Spanish)
+  * Translated using Weblate (Spanish)
+  * Translated using Weblate (Spanish)
+  * Translated using Weblate (Spanish)
+  * Translated using Weblate (Spanish)
+
+  [ Luis A. Arizmendi ]
+  * Translated using Weblate (Spanish)
+  * Translated using Weblate (Spanish)
+  * Translated using Weblate (Spanish)
+  * Translated using Weblate (Spanish)
+
+  [ Fred ]
+  * Translated using Weblate (French)
+
+  [ Veiko Aasa ]
+  * names: Fix Local Network Domain is not shown
+
+  [ Thomas Vincent ]
+  * Translated using Weblate (French)
+
+  [ Nektarios Katakis ]
+  * shadowshocks: Fix setting configuration on Buster
+
+  [ Michael Breidenbach ]
+  * Translated using Weblate (Swedish)
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Mon, 23 Mar 2020 19:42:28 -0400
+
+plinth (20.4) unstable; urgency=medium
+
+  [ Thomas Vincent ]
+  * Translated using Weblate (French)
+  * Translated using Weblate (French)
+
+  [ Sunil Mohan Adapa ]
+  * networks: Fixes for networks wizards
+  * avahi: Use generic app view
+  * privoxy: Use generic app view
+  * infinoted: Move views to a separate views module
+  * help: Rename views modules as 'views'
+  * networks: Rename views modules as 'views'
+  * diagnostics: Rename views modules, move utilities to main module
+  * backups: cosmetic: Rename .inc file to .html
+  * css: Merge responsive.css into main style file
+  * css: cosmetic: Rename plinth.css to main.css
+  * views: Don't send app to template context
+  * app: Fix showing app name in port forwarding information
+  * networks: Rename polkit JS authority rules file
+  * firewalld: Add polkit JS authority rules files
+  * networks: Show router wizard before Internet connection type wizard
+  * networks: Don't show router wizard if not behind a router
+  * networks: If topology wizard is skipped, skip router wizard too
+  * apache: Handle transition to php 7.4
+
+  [ Joseph Nuthalapati ]
+  * Translated using Weblate (Telugu)
+  * shadowsocks: Move user settings to state directory
+
+  [ Veiko Aasa ]
+  * storage: Directory selection form improvements
+  * transmission: Allow one to submit download directory if it is creatable
+  * plinth: Increase sqlite busy timeout from default 5s to 30s
+  * upgrades: Clean apt cache every week
+  * apps: Do not show status block if service is running
+  * i2p: New style app page layout
+  * quassel: Fix unable to disable application without choosing a domain name
+
+  [ Luis A. Arizmendi ]
+  * Translated using Weblate (Spanish)
+
+  [ Nektarios Katakis ]
+  * networks: Add form for network topology
+  * networks: Add page for network topology form
+  * networks: First boot view for network topology wizard
+  * networks: First boot step for network topology wizard
+  * networks: Save networks topology type to DB
+  * networks: Update main networks page Internet connectivity section
+
+  [ Michael Breidenbach ]
+  * Translated using Weblate (Swedish)
+
+  [ James Valleroy ]
+  * ci: Switch to testing image
+  * locale: Update translation strings
+  * doc: Fetch latest manual
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Mon, 09 Mar 2020 20:01:44 -0400
+
+plinth (20.3) unstable; urgency=medium
+
+  [ Sunil Mohan Adapa ]
+  * web_framework: Separate out Django settings into module
+  * doc/dev: Allow all modules to be imported by Sphinx
+  * notification: Add developer documentation
+  * doc/dev: Update copyright year
+  * app: Update style for toggle button
+  * app: Drop border shadow for app icon in mobile view
+  * app: cosmetic: Minor refactoring of header styling
+  * app: Simplify some header styling
+  * app: cosmetic: Rename a CSS style class in app header
+  * app: cosmetic: Rename header.html to app-header.html
+  * app: Show short description as secondary title
+  * networks: Fix i18n for wizard forms
+  * networks: Minor changes to router/internet configuration forms
+  * web_framework: Generate and retain a secret key
+  * web_framework: Cleanup expired sessions every week
+
+  [ Nektarios Katakis ]
+  * networks: Add form for internet connection type
+  * networks: Add network view and url for internet connection help page
+  * networks: Link internet connection help page with networks page.
+  * networks: All first step wizard form for internet connection type
+  * networks: Add first boot step for internet connection type
+  * networks: Save to kvstore internet connectivity type
+  * networks: Refactor connections list template
+  * networks: Show internet connectivity string in main page
+
+  [ Michael Breidenbach ]
+  * Translated using Weblate (German)
+  * Translated using Weblate (Swedish)
+
+  [ Dietmar ]
+  * Translated using Weblate (Italian)
+
+  [ Jaime Marquínez Ferrándiz ]
+  * Translated using Weblate (Spanish)
+
+  [ Luis A. Arizmendi ]
+  * Translated using Weblate (Spanish)
+
+  [ Joseph Nuthalapati ]
+  * shadowsocks: Fix shadowsocks not able to start
+
+  [ James Valleroy ]
+  * locale: Update translation strings
+  * doc: Fetch latest manual
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Mon, 24 Feb 2020 20:16:12 -0500
+
+plinth (20.2.1) unstable; urgency=high
+
+  [ Veiko Aasa ]
+  * apps: remove css filters and glow from app icons
+  * config: Depends also on apache module
+
+  [ Dietmar ]
+  * Translated using Weblate (German)
+  * Translated using Weblate (Italian)
+  * Translated using Weblate (Italian)
+
+  [ Petter Reinholdtsen ]
+  * Translated using Weblate (Norwegian Bokmål)
+
+  [ Sunil Mohan Adapa ]
+  * cards: Remove the transition delay on hover effect
+  * system: Implement new style for cards
+  * jsxc: Bypass issue with stronghold to get the app working again
+  * jsxc: Fix functional test case failure
+  * functional_tests: cosmetic: Minor yapf change
+  * app: Introduce Info component to store basic app information
+  * app: Add info property as shortcut to access basic information
+  * app: Refactor all apps to use the Info component
+  * app: Document the app_id property for App class
+  * doc/dev: Include information on how to edit dev documentation
+  * views: Document the AppView class properties
+  * monkeysphere: Fix regression with reading Apache configuration
+  * Translated using Weblate (Italian)
+  * firewall: Use firewalld DBus API for most operations
+  * *.py: Use SPDX license identifier
+  * *.html: Use SPDX license identifier
+  * actions/*: Use SPDX license identifier
+  * functional_tests: Use SPDX license identifier
+  * *.css: Use SPDX license identifier
+  * *: Update misc build related files to use SPDX license identifier
+  * doc/dev: Update tutorial to use SPDX license indentifier
+  * *: Update remaining misc files to use SPDX license identifier
+  * *.js: Use SPDX license identifier
+  * help: Fix attribute on download manual button
+  * css: Add missing license identifier on some CSS files
+  * firewalld: Ignore errors with DBus API when firewalld is not running
+  * deluge: Don't use code execution for editing configuration
+  * deluge: More reliable initial configuration setup
+
+  [ Joseph Nuthalapati ]
+  * l10n: Fix gettext not detecting no-python-format
+  * samba: Add link to manual page
+  * searx: Update search engines for 0.16.0
+
+  [ Allan Nordhøy ]
+  * openvpn: Fix spelling for Tunnelblick
+  * Translated using Weblate (Norwegian Bokmål)
+
+  [ Nektarios Katakis ]
+  * bind: parse zones files
+  * bind: test for parsing zones file with specific format
+  * bind: views show served domains in main view
+  * bind: create zones directory on setup action
+
+  [ James Valleroy ]
+  * bind: Bump version and handle upgrade
+
+  [ Ralf Barkow ]
+  * Translated using Weblate (German)
+
+  [ nautilusx ]
+  * Translated using Weblate (German)
+
+  [ Doma Gergő ]
+  * Translated using Weblate (Hungarian)
+
+  [ Lev Lamberov ]
+  * debian: Update Russian translation for debconf (Closes: #951440)
+
+  [ Radek Pasiok ]
+  * Translated using Weblate (Polish)
+
+  [ Alice Kile ]
+  * gitignore: Add .vscode & segregate editor settings
+
+  [ Thomas Vincent ]
+  * Translated using Weblate (French)
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Fri, 21 Feb 2020 22:38:12 -0500
+
+plinth (20.2) unstable; urgency=medium
+
+  [ Veiko Aasa ]
+  * networks: Support virtual Ethernet (veth) devices
+  * diagnostics: Show firewall service status
+  * users: Fix functional test delete user
+  * storage: Show disks if FreedomBox is running in an unprivileged container
+  * service: Stop service not before but after disabling it
+  * users: More precise username validation
+  * sso, users: Turn off autocapitalization on the username field
+  * users: Add unit tests for views
+  * help: Fix anchor hidden under navbar
+
+  [ Joseph Nuthalapati ]
+  * tests: Use the latest version of geckodriver
+  * vagrant: Add alias for run --develop
+  * l10n: Add blocktrans trimmed tag on a block
+  * l10n: Add missing trimmed to blocktrans blocks
+  * vagrant: Allocate cpus equal to the no. of cores
+  * Translated using Weblate (Telugu)
+  * searx: Fix installation issue for 0.16.0
+
+  [ Sunil Mohan Adapa ]
+  * firewall: Show Run Diagnostics button in app
+  * help: Eliminate redundant HTML attribute in template
+  * glib: Create a new module to deal with all things glib
+  * glib: Introduce method to schedule an operation at regular intervals
+  * web_framework: Set the timezone to UTC
+  * log: Ability to log SQL queries (disabled by default)
+  * tests: Allow adding test templates
+  * models: Add model for storing notifications
+  * notification: New API for showing better notifications
+  * notification: Add tests for notification API
+  * views: A view to dismiss notifications
+  * notification: Show a drop down from main navbar for notifications
+  * storage: Show low disk space warning using notifications API
+  * upgrades: Show notification when FreedomBox is updated
+  * storage: In develop mode check for low disk space more frequently
+
+  [ Thomas Vincent ]
+  * Translated using Weblate (French)
+
+  [ Allan Nordhøy ]
+  * Translated using Weblate (Norwegian Bokmål)
+
+  [ Ralf Barkow ]
+  * Translated using Weblate (German)
+
+  [ Luis A. Arizmendi ]
+  * Translated using Weblate (Spanish)
+
+  [ James Valleroy ]
+  * users: Make help text translatable
+  * security: Add Sandbox Coverage to report page
+  * bind: Add CapabilityBoundingSet and ReadWritePaths to service file
+  * matrixsynapse: Enable systemd sandboxing
+  * security: Drop PrivateUsers=yes from all service files
+  * locale: Update translation strings
+  * doc: Fetch latest manual
+
+  [ Michael Breidenbach ]
+  * Translated using Weblate (German)
+  * Translated using Weblate (Swedish)
+
+ -- James Valleroy <jvalleroy@mailbox.org>  Mon, 10 Feb 2020 19:22:55 -0500
+
 plinth (20.1) unstable; urgency=medium
 
   [ ikmaak ]

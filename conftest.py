@@ -1,27 +1,27 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 pytest configuration for all tests.
 """
 
+import importlib
 import os
 import pathlib
 
 import pytest
+
+try:
+    importlib.import_module('pytest_bdd')
+    _bdd_available = True
+except ImportError:
+    _bdd_available = False
+else:
+    from plinth.tests.functional.step_definitions import *
+
+
+def pytest_ignore_collect(path, config):
+    """Return True to ignore functional tests."""
+    if path.basename == 'test_functional.py':
+        return not _bdd_available
 
 
 def pytest_addoption(parser):
@@ -31,7 +31,7 @@ def pytest_addoption(parser):
 
 
 def pytest_collection_modifyitems(config, items):
-    """Filter out functional tests unless --include-functional arg is passed."""
+    """Filter out functional tests unless --include-functional is passed."""
     if config.getoption('--include-functional'):
         # Option provided on command line, no filtering
         return
@@ -39,7 +39,9 @@ def pytest_collection_modifyitems(config, items):
     skip_functional = pytest.mark.skip(
         reason='--include-functional not provided')
     for item in items:
-        if 'functional' in item.keywords:
+        if 'functional' in item.keywords or (
+                item.parent.fspath.basename
+                and item.parent.fspath.basename == 'test_functional.py'):
             item.add_marker(skip_functional)
 
 

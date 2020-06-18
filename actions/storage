@@ -1,20 +1,5 @@
 #!/usr/bin/python3
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Configuration helper for disks manager.
 """
@@ -48,6 +33,10 @@ def parse_arguments():
         help='Expand a partition to take adjacent free space')
     subparser.add_argument('device',
                            help='Partition which needs to be resized')
+
+    subparser = subparsers.add_parser('mount', help='Mount a filesystem')
+    subparser.add_argument('--block-device',
+                           help='Block device of the filesystem to mount')
 
     subparser = subparsers.add_parser('eject', help='Eject a storage device')
     subparser.add_argument('device', help='Path of the device to eject')
@@ -247,6 +236,26 @@ def _interpret_unit(value):
     return int(value)
 
 
+def subcommand_mount(arguments):
+    """Mount a disk are root user.
+
+    XXX: This is primarily to provide compatibility with older code that used
+    udiskie to auto-mount all partitions as root user under /media/root/
+    directory. We are setting special permissions for the directory /media/root
+    and users have set shared folders using this path. This can be removed in
+    favor of using DBus API once we have a migration plan in place. Disks can
+    be mounted directly /mount without ACL restrictions that apply to
+    /mount/<user> directories. This can be done by setting udev flag
+    UDISKS_FILESYSTEM_SHARED=1 by writing a udev rule.
+
+    """
+    process = subprocess.run([
+        'udisksctl', 'mount', '--block-device', arguments.block_device,
+        '--no-user-interaction'
+    ])
+    sys.exit(process.returncode)
+
+
 def subcommand_eject(arguments):
     """Eject a device by its path."""
     device_path = arguments.device
@@ -348,6 +357,9 @@ def subcommand_usage_info(_):
 
 def subcommand_validate_directory(arguments):
     """Validate a directory"""
+    if os.geteuid() == 0:
+        raise RuntimeError('You must not be root to run this command')
+
     directory = arguments.path
 
     def part_exists(path):
@@ -364,14 +376,15 @@ def subcommand_validate_directory(arguments):
         if not os.path.exists(directory):
             # doesn't exist
             print('ValidationError: 1')
+            return
 
     if not os.path.isdir(directory):
         # is not a directory
         print('ValidationError: 2')
-    if not os.access(directory, os.R_OK):
+    elif not os.access(directory, os.R_OK):
         # is not readable
         print('ValidationError: 3')
-    if arguments.check_writable or arguments.check_creatable:
+    elif arguments.check_writable or arguments.check_creatable:
         if not os.access(directory, os.W_OK):
             # is not writable
             print('ValidationError: 4')

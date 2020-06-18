@@ -1,23 +1,9 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app for security configuration.
 """
 
+import re
 import subprocess
 from collections import defaultdict
 
@@ -34,13 +20,9 @@ version = 6
 
 is_essential = True
 
-name = _('Security')
-
 managed_packages = ['fail2ban', 'debsecan']
 
 managed_services = ['fail2ban']
-
-manual_page = 'Security'
 
 ACCESS_CONF_FILE = '/etc/security/access.d/50freedombox.conf'
 ACCESS_CONF_FILE_OLD = '/etc/security/access.conf'
@@ -59,7 +41,12 @@ class SecurityApp(app_module.App):
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-security', name, None, 'fa-lock',
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               is_essential=is_essential, name=_('Security'),
+                               icon='fa-lock', manual_page='Security')
+        self.add(info)
+
+        menu_item = menu.Menu('menu-security', info.name, None, info.icon,
                               'security:index', parent_url_name='system')
         self.add(menu_item)
 
@@ -128,6 +115,16 @@ def get_apps_report():
     except Exception:
         past_cves = None
 
+    service_exposure_lines = subprocess.check_output(
+        ['systemd-analyze', 'security']).decode().strip().split('\n')
+    service_exposure_lines.pop(0)
+    sandbox_coverage = {}
+    for line in service_exposure_lines:
+        fields = line.split()
+        name = re.sub(r'\.service$', '', fields[0])
+        score = round(100 - float(fields[1]) * 10)
+        sandbox_coverage[name] = score
+
     apps = {
         'freedombox': {
             'name': 'freedombox',
@@ -171,6 +168,8 @@ def get_apps_report():
             for service in services:
                 if _get_service_is_sandboxed(service):
                     apps[module_name]['sandboxed'] = True
+                    apps[module_name][
+                        'sandbox_coverage'] = sandbox_coverage.get(service)
 
     for cve_packages in cves.values():
         for app_ in apps.values():

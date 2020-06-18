@@ -1,29 +1,81 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Application manifest for Samba.
 """
 
-from plinth.clients import validate
+from django.utils.translation import ugettext_lazy as _
+
+from plinth.clients import store_url, validate
 from plinth.modules.backups.api import validate as validate_backup
 
 SHARES_CONF_BACKUP_FILE = '/var/lib/plinth/backups-data/samba-shares-dump.conf'
 
-clients = validate([])
+clients = validate([{
+    'name':
+        _('Android Samba Client'),
+    'platforms': [{
+        'type':
+            'store',
+        'os':
+            'android',
+        'store_name':
+            'f-droid',
+        'url':
+            store_url('f-droid', 'com.google.android.sambadocumentsprovider')
+    }]
+}, {
+    'name':
+        _('Ghost Commander - Samba plugin'),
+    'platforms': [{
+        'type': 'store',
+        'os': 'android',
+        'store_name': 'f-droid',
+        'url': store_url('f-droid', 'com.ghostsq.commander.samba')
+    }, {
+        'type': 'store',
+        'os': 'android',
+        'store_name': 'google-play',
+        'url': store_url('google-play', 'com.ghostsq.commander.smb')
+    }]
+}, {
+    'name':
+        _('VLC media player'),
+    'platforms': [{
+        'type': 'store',
+        'os': 'android',
+        'store_name': 'f-droid',
+        'url': store_url('f-droid', 'org.videolan.vlc')
+    }, {
+        'type': 'store',
+        'os': 'android',
+        'store_name': 'google-play',
+        'url': store_url('google-play', 'org.videolan.vlc')
+    }]
+}, {
+    'name':
+        _('GNOME Files'),
+    'platforms': [{
+        'type': 'package',
+        'format': 'deb',
+        'name': 'nautilus',
+    }, {
+        'type': 'download',
+        'os': 'gnu-linux',
+        'url': 'https://wiki.gnome.org/Apps/Files'
+    }]
+}, {
+    'name':
+        _('Dolphin'),
+    'platforms': [{
+        'type': 'package',
+        'format': 'deb',
+        'name': 'dolphin',
+    }, {
+        'type': 'download',
+        'os': 'gnu-linux',
+        'url': 'https://kde.org/applications/system/org.kde.dolphin'
+    }]
+}])
 
 backup = validate_backup({
     'data': {

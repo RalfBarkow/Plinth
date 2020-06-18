@@ -1,20 +1,5 @@
 #!/usr/bin/python3
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox Service setup file.
 """
@@ -22,6 +7,7 @@ FreedomBox Service setup file.
 import collections
 import glob
 import os
+import pathlib
 import re
 import shutil
 import subprocess
@@ -57,6 +43,12 @@ DISABLED_APPS_TO_REMOVE = [
     'xmpp',
     'disks',
     'udiskie',
+    'restore',
+    'repro',
+]
+
+REMOVED_FILES = [
+    '/etc/apt/preferences.d/50freedombox3.pref',
 ]
 
 LOCALE_PATHS = ['plinth/locale']
@@ -136,11 +128,16 @@ class CustomClean(clean):
 class CustomInstall(install):
     """Override install command."""
     def run(self):
-        log.info("Removing disabled apps")
         for app in DISABLED_APPS_TO_REMOVE:
-            file_path = os.path.join(ENABLED_APPS_PATH, app)
-            log.info("removing '%s'", file_path)
-            subprocess.check_call(['rm', '-f', file_path])
+            file_path = pathlib.Path(ENABLED_APPS_PATH) / app
+            if file_path.exists():
+                log.info("removing '%s'", str(file_path))
+                subprocess.check_call(['rm', '-f', str(file_path)])
+
+        for path in REMOVED_FILES:
+            if pathlib.Path(path).exists():
+                log.info('removing %s', path)
+                subprocess.check_call(['rm', '-f', path])
 
         install.run(self)
 
@@ -188,7 +185,7 @@ def _ignore_data_file(file_name):
     ignore_patterns = [
         r'\.log$', r'\.pid$', r'\.py.bak$', r'\.pyc$', r'\.pytest_cache$',
         r'\.sqlite3$', r'\.swp$', r'^#', r'^\.', r'^__pycache__$',
-        r'^sessionid\w*$', r'~$'
+        r'^sessionid\w*$', r'~$', r'django-secret.key'
     ]
     for pattern in ignore_patterns:
         if re.match(pattern, file_name):
@@ -308,7 +305,7 @@ setuptools.setup(
         'requests',
     ],
     package_data={
-        '': ['templates/*', 'static/*', 'locale/*/LC_MESSAGES/*.[pm]o']
+        '': ['templates/*', 'static/*', 'locale/*/LC_MESSAGES/*.mo']
     },
     exclude_package_data={'': ['*/data/*']},
     data_files=_gather_data_files() +

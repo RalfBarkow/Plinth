@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Forms for directory selection.
 """
@@ -26,7 +11,6 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from plinth import actions, module_loader
-from plinth.forms import AppForm
 from plinth.modules import storage
 
 
@@ -93,8 +77,8 @@ class DirectoryValidator:
         if 'ValidationError' in output:
             error_nr = int(output.strip().split()[1])
             if error_nr == 1:
-                raise ValidationError(
-                    _('Directory does not exist.'), 'invalid')
+                raise ValidationError(_('Directory does not exist.'),
+                                      'invalid')
             elif error_nr == 2:
                 raise ValidationError(_('Path is not a directory.'), 'invalid')
             elif error_nr == 3:
@@ -105,12 +89,12 @@ class DirectoryValidator:
                     _('Directory is not writable by the user.'), 'invalid')
 
 
-class DirectorySelectForm(AppForm):
+class DirectorySelectForm(forms.Form):
     """Directory selection form."""
     storage_dir = forms.ChoiceField(choices=[], label=_('Directory'),
                                     required=True)
-    storage_subdir = forms.CharField(
-        label=_('Subdirectory (optional)'), required=False)
+    storage_subdir = forms.CharField(label=_('Subdirectory (optional)'),
+                                     required=False)
 
     def __init__(self, title=None, default='/', validator=DirectoryValidator,
                  *args, **kwargs):
@@ -118,21 +102,20 @@ class DirectorySelectForm(AppForm):
         if title:
             self.fields['storage_dir'].label = title
         self.validator = validator
-        self.default = os.path.normpath(default)
+        self.default = default
         self.set_form_data()
 
     def clean(self):
         """Clean and validate form data."""
-        if self.cleaned_data['is_enabled'] or not self.initial['is_enabled']:
-            storage_dir = self.cleaned_data['storage_dir']
-            storage_subdir = self.cleaned_data['storage_subdir']
-            if storage_dir != '/':
-                storage_subdir = storage_subdir.lstrip('/')
-            storage_path = os.path.realpath(
-                os.path.join(storage_dir, storage_subdir))
-            if self.validator:
-                self.validator(storage_path)
-            self.cleaned_data.update({'storage_path': storage_path})
+        storage_dir = self.cleaned_data['storage_dir']
+        storage_subdir = self.cleaned_data['storage_subdir']
+        if storage_dir != '/':
+            storage_subdir = storage_subdir.lstrip('/')
+        storage_path = os.path.realpath(
+            os.path.join(storage_dir, storage_subdir))
+        if self.validator:
+            self.validator(storage_path)
+        self.cleaned_data.update({'storage_path': storage_path})
 
     def get_initial(self, choices):
         """Get initial form data."""

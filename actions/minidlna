@@ -1,34 +1,25 @@
 #!/usr/bin/python3
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Configuration actions for the minidlna server.
 """
 import argparse
-from tempfile import mkstemp
-from shutil import move
 import subprocess
-from os import fdopen, remove, chmod, stat
+from os import chmod, fdopen, remove, stat
+from shutil import move
+from tempfile import mkstemp
 
 import augeas
+
 from plinth import action_utils
 from plinth.utils import grep
 
 CONFIG_PATH = '/etc/minidlna.conf'
+
+SYSCTL_CONF = '''# This file is managed and overwritten by FreedomBox.
+# Helps minidlna monitor changes in large media directories
+fs.inotify.max_user_watches = 100000
+'''
 
 
 def parse_arguments():
@@ -48,21 +39,36 @@ def parse_arguments():
     return parser.parse_args()
 
 
+def _undo_old_configuration_changes():
+    """Restore /etc/sysctl.conf to before our changes.
+
+    Older version of minidlna app in FreedomBox < 20.9 wrote to
+    /etc/sysctl.conf directly. This will cause conffile prompt during upgrade
+    of procps package. Undo the changes so that upgrade can happen smoothly.
+
+    """
+    aug = augeas.Augeas(flags=augeas.Augeas.NO_LOAD +
+                        augeas.Augeas.NO_MODL_AUTOLOAD)
+    aug.set('/augeas/load/Sysctl/lens', 'Sysctl.lns')
+    aug.set('/augeas/load/Sysctl/incl[last() + 1]', '/etc/sysctl.conf')
+    aug.load()
+
+    key_path = '/files/etc/sysctl.conf/fs.inotify.max_user_watches'
+    if aug.get(key_path) == '100000':
+        aug.remove(key_path)
+        aug.save()
+
+
 def subcommand_setup(arguments):
     """
     Increase inotify watches per folder to allow minidlna to
     monitor changes in large media-dirs.
     """
-    aug = augeas.Augeas(
-        flags=augeas.Augeas.NO_LOAD + augeas.Augeas.NO_MODL_AUTOLOAD)
-    aug.set('/augeas/load/Sysctl/lens', 'Sysctl.lns')
-    aug.set('/augeas/load/Sysctl/incl[last() + 1]', '/etc/sysctl.conf')
-    aug.load()
+    _undo_old_configuration_changes()
+    with open('/etc/sysctl.d/50-freedombox-minidlna.conf', 'w') as conf:
+        conf.write(SYSCTL_CONF)
 
-    aug.set('/files/etc/sysctl.conf/fs.inotify.max_user_watches', '100000')
-    aug.save()
-
-    subprocess.run(['sysctl', '--system'], check=True)
+    subprocess.run(['systemctl', 'restart', 'systemd-sysctl'], check=True)
 
 
 def subcommand_get_media_dir(arguments):

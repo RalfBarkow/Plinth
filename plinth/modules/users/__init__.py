@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app to manage users.
 """
@@ -28,6 +13,8 @@ from plinth import app as app_module
 from plinth import cfg, menu
 from plinth.daemon import Daemon
 from plinth.utils import format_lazy
+
+from .components import UsersAndGroups
 
 version = 3
 
@@ -48,9 +35,7 @@ first_boot_steps = [
     },
 ]
 
-name = _('Users and Groups')
-
-description = [
+_description = [
     _('Create and managed user accounts. These accounts serve as centralized '
       'authentication mechanism for most apps. Some apps further require a '
       'user account to be part of a group to authorize the user to access the '
@@ -62,11 +47,6 @@ description = [
         box_name=_(cfg.box_name))
 ]
 
-manual_page = 'Users'
-
-# All FreedomBox user groups
-groups = dict()
-
 app = None
 
 
@@ -75,16 +55,30 @@ class UsersApp(app_module.App):
 
     app_id = 'users'
 
+    can_be_disabled = False
+
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-users', name, None, 'fa-users',
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               is_essential=is_essential,
+                               name=_('Users and Groups'), icon='fa-users',
+                               description=_description, manual_page='Users')
+        self.add(info)
+
+        menu_item = menu.Menu('menu-users', info.name, None, info.icon,
                               'users:index', parent_url_name='system')
         self.add(menu_item)
 
         daemon = Daemon('daemon-users', managed_services[0],
                         listen_ports=[(389, 'tcp4'), (389, 'tcp6')])
         self.add(daemon)
+
+        # Add the admin group
+        groups = {'admin': _('Access to all services and system settings')}
+        users_and_groups = UsersAndGroups('users-and-groups-admin',
+                                          groups=groups)
+        self.add(users_and_groups)
 
     def diagnose(self):
         """Run diagnostics and return the results."""
@@ -140,10 +134,6 @@ def remove_group(group):
     actions.superuser_run('users', options=['remove-group', group])
 
 
-def register_group(group):
-    groups[group[0]] = group[1]
-
-
 def get_last_admin_user():
     """If there is only one admin user return its name else return None."""
     output = actions.superuser_run('users', ['get-group-users', 'admin'])
@@ -165,4 +155,4 @@ def add_user_to_share_group(username, service=None):
         actions.superuser_run(
             'users', ['add-user-to-group', username, 'freedombox-share'])
         if service:
-            actions.superuser_run('service', ['restart', service])
+            actions.superuser_run('service', ['try-restart', service])

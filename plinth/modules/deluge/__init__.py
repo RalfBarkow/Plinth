@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app to configure a Deluge web client.
 """
@@ -26,7 +11,8 @@ from plinth import frontpage, menu
 from plinth.daemon import Daemon
 from plinth.modules.apache.components import Webserver
 from plinth.modules.firewall.components import Firewall
-from plinth.modules.users import register_group, add_user_to_share_group
+from plinth.modules.users import add_user_to_share_group
+from plinth.modules.users.components import UsersAndGroups
 
 from .manifest import backup, clients  # noqa, pylint: disable=unused-import
 
@@ -36,27 +22,15 @@ managed_services = ['deluged', 'deluge-web']
 
 managed_packages = ['deluged', 'deluge-web']
 
-name = _('Deluge')
-
-icon_filename = 'deluge'
-
-short_description = _('BitTorrent Web Client')
-
-description = [
+_description = [
     _('Deluge is a BitTorrent client that features a Web UI.'),
     _('The default password is \'deluge\', but you should log in and '
       'change it immediately after enabling this service.')
 ]
 
-group = ('bit-torrent', _('Download files using BitTorrent applications'))
-
-reserved_usernames = ['debian-deluged']
-
-clients = clients
-
-manual_page = 'Deluge'
-
 app = None
+
+SYSTEM_USER = 'debian-deluged'
 
 
 class DelugeApp(app_module.App):
@@ -67,18 +41,33 @@ class DelugeApp(app_module.App):
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-deluge', name, short_description, 'deluge',
-                              'deluge:index', parent_url_name='apps')
+
+        groups = {
+            'bit-torrent': _('Download files using BitTorrent applications')
+        }
+
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               name=_('Deluge'), icon_filename='deluge',
+                               short_description=_('BitTorrent Web Client'),
+                               description=_description, manual_page='Deluge',
+                               clients=clients)
+        self.add(info)
+
+        menu_item = menu.Menu('menu-deluge', info.name, info.short_description,
+                              info.icon_filename, 'deluge:index',
+                              parent_url_name='apps')
         self.add(menu_item)
 
-        shortcut = frontpage.Shortcut(
-            'shortcut-deluge', name, short_description=short_description,
-            url='/deluge', icon=icon_filename, clients=clients,
-            login_required=True, allowed_groups=[group[0]])
+        shortcut = frontpage.Shortcut('shortcut-deluge', info.name,
+                                      short_description=info.short_description,
+                                      url='/deluge', icon=info.icon_filename,
+                                      clients=info.clients,
+                                      login_required=True,
+                                      allowed_groups=list(groups))
         self.add(shortcut)
 
-        firewall = Firewall('firewall-deluge', name, ports=['http', 'https'],
-                            is_external=True)
+        firewall = Firewall('firewall-deluge', info.name,
+                            ports=['http', 'https'], is_external=True)
         self.add(firewall)
 
         webserver = Webserver('webserver-deluge', 'deluge-plinth',
@@ -93,12 +82,16 @@ class DelugeApp(app_module.App):
                             listen_ports=[(8112, 'tcp4')])
         self.add(daemon_web)
 
+        users_and_groups = UsersAndGroups('users-and-groups-deluge',
+                                          reserved_usernames=[SYSTEM_USER],
+                                          groups=groups)
+        self.add(users_and_groups)
+
 
 def init():
     """Initialize the Deluge module."""
     global app
     app = DelugeApp()
-    register_group(group)
 
     setup_helper = globals()['setup_helper']
     if setup_helper.get_state() != 'needs-setup' and app.is_enabled():
@@ -109,5 +102,5 @@ def setup(helper, old_version=None):
     """Install and configure the module."""
     helper.install(managed_packages)
     helper.call('post', actions.superuser_run, 'deluge', ['setup'])
-    add_user_to_share_group(reserved_usernames[0])
+    add_user_to_share_group(SYSTEM_USER)
     helper.call('post', app.enable)

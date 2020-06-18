@@ -1,34 +1,21 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app to configure PageKite.
 """
 
 from django.utils.translation import ugettext_lazy as _
 
+from plinth import actions
 from plinth import app as app_module
 from plinth import cfg, menu
+from plinth.daemon import Daemon
 from plinth.modules.names.components import DomainType
 from plinth.utils import format_lazy
 
 from . import utils
 from .manifest import backup  # noqa, pylint: disable=unused-import
 
-version = 1
+version = 2
 
 depends = ['names']
 
@@ -36,11 +23,7 @@ managed_services = ['pagekite']
 
 managed_packages = ['pagekite']
 
-name = _('PageKite')
-
-short_description = _('Public Visibility')
-
-description = [
+_description = [
     format_lazy(
         _('PageKite is a system for exposing {box_name} services when '
           'you don\'t have a direct connection to the Internet. You only '
@@ -66,8 +49,6 @@ description = [
         box_name=_(cfg.box_name))
 ]
 
-manual_page = 'PageKite'
-
 app = None
 
 
@@ -79,16 +60,35 @@ class PagekiteApp(app_module.App):
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-pagekite', name, short_description,
-                              'fa-flag', 'pagekite:index',
-                              parent_url_name='system')
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               depends=depends, name=_('PageKite'),
+                               icon='fa-flag',
+                               short_description=_('Public Visibility'),
+                               description=_description,
+                               manual_page='PageKite')
+        self.add(info)
+
+        menu_item = menu.Menu('menu-pagekite', info.name,
+                              info.short_description, info.icon,
+                              'pagekite:index', parent_url_name='system')
         self.add(menu_item)
 
         domain_type = DomainType('domain-type-pagekite', _('PageKite Domain'),
                                  'pagekite:index', can_have_certificate=True)
         self.add(domain_type)
 
-        # XXX: Add pagekite daemon component and simplify action script
+        daemon = Daemon('daemon-pagekite', managed_services[0])
+        self.add(daemon)
+
+    def enable(self):
+        """Send domain signals after enabling the app."""
+        super().enable()
+        utils.update_names_module(is_enabled=True)
+
+    def disable(self):
+        """Send domain signals before disabling the app."""
+        utils.update_names_module(is_enabled=False)
+        super().disable()
 
 
 def init():
@@ -100,11 +100,15 @@ def init():
     if setup_helper.get_state() != 'needs-setup' and app.is_enabled():
         app.set_enabled(True)
 
-    # Register kite name with Name Services module.
-    utils.update_names_module(initial_registration=True)
+        # Register kite name with Name Services module.
+        utils.update_names_module(is_enabled=True)
 
 
 def setup(helper, old_version=None):
     """Install and configure the module."""
     helper.install(managed_packages)
-    helper.call('post', app.enable)
+    if not old_version:
+        helper.call('post', app.enable)
+
+    if old_version == 1:
+        actions.superuser_run('service', ['try-restart', managed_services[0]])

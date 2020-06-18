@@ -1,24 +1,10 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Test module for storage module operations.
 """
 
 import os
+import pathlib
 import re
 import subprocess
 import tempfile
@@ -96,6 +82,15 @@ class Disk():
             subprocess.run(command, stdout=subprocess.DEVNULL,
                            stderr=subprocess.DEVNULL, check=True)
 
+    def _unmount_file_systems(self):
+        """Unmount al partitions if it is mounted by external party."""
+        if not self.file_system_info:
+            return
+
+        for partition, _ in self.file_system_info:
+            device = _get_partition_device(self.device, partition)
+            subprocess.run(['umount', device], check=False)
+
     def _cleanup_loopback(self):
         """Undo the loopback device setup."""
         subprocess.run(['losetup', '--detach', self.device])
@@ -114,6 +109,7 @@ class Disk():
 
     def __exit__(self, *exc):
         """Exit the context, destroy the test disk."""
+        self._unmount_file_systems()
         self._cleanup_loopback()
         self._remove_disk_file()
 
@@ -209,14 +205,14 @@ class TestActions:
     @staticmethod
     def call_action(action_command, **kwargs):
         """Call the action script."""
-        current_directory = os.path.dirname(os.path.realpath(__file__))
-        action = os.path.join(current_directory, '..', '..', '..', '..',
-                              'actions', action_command[0])
-        action_command[0] = action
+        test_directory = pathlib.Path(__file__).parent
+        top_directory = (test_directory / '..' / '..' / '..' / '..').resolve()
+        action_command[0] = top_directory / 'actions' / action_command[0]
         kwargs['stdout'] = kwargs.get('stdout', subprocess.DEVNULL)
         kwargs['stderr'] = kwargs.get('stderr', subprocess.DEVNULL)
         kwargs['check'] = kwargs.get('check', True)
-        return subprocess.run(action_command, **kwargs)
+        env = dict(os.environ, PYTHONPATH=str(top_directory))
+        return subprocess.run(action_command, env=env, **kwargs)
 
     def check_action(self, action_command):
         """Return success/failure result of the action command."""
@@ -236,7 +232,7 @@ class TestActions:
     def assert_btrfs_file_system_healthy(self, partition_number):
         """Perform a successful ext4 file system check."""
         device = _get_partition_device(self.device, partition_number)
-        command = ['btrfs', 'check', device]
+        command = ['btrfs', 'check', '--force', device]
         subprocess.run(command, stdout=subprocess.DEVNULL,
                        stderr=subprocess.DEVNULL, check=True)
 
@@ -265,45 +261,25 @@ class TestActions:
             assert output == error
 
     @pytest.mark.usefixtures('needs_not_root')
-    @pytest.mark.parametrize('directory', [{
-        'path': '/missing',
-        'error': '1'
-    }, {
-        'path': '/etc/os-release',
-        'error': '2'
-    }, {
-        'path': '/root',
-        'error': '3'
-    }, {
-        'path': '/',
-        'error': ''
-    }])
-    def test_validate_directory(self, directory):
+    @pytest.mark.parametrize('path,error', [('/missing', '1'),
+                                            ('/etc/os-release', '2'),
+                                            ('/root', '3'), ('/', ''),
+                                            ('/etc/..', '')])
+    def test_validate_directory(self, path, error):
         """Test that directory validation returns expected output."""
-        self.assert_validate_directory(directory['path'], directory['error'])
+        self.assert_validate_directory(path, error)
 
     @pytest.mark.usefixtures('needs_not_root')
-    @pytest.mark.parametrize('directory', [{
-        'path': '/',
-        'error': '4'
-    }, {
-        'path': '/tmp',
-        'error': ''
-    }])
-    def test_validate_directory_writable(self, directory):
+    @pytest.mark.parametrize('path,error', [('/', '4'), ('/tmp', '')])
+    def test_validate_directory_writable(self, path, error):
         """Test that directory writable validation returns expected output."""
-        self.assert_validate_directory(directory['path'], directory['error'],
-                                       check_writable=True)
+        self.assert_validate_directory(path, error, check_writable=True)
 
     @pytest.mark.usefixtures('needs_not_root')
-    @pytest.mark.parametrize('directory', [{
-        'path': '/var/lib/plinth_storage_test_not_exists',
-        'error': '4'
-    }, {
-        'path': '/tmp/plint_storage_test_not_exists',
-        'error': ''
-    }])
-    def test_validate_directory_creatable(self, directory):
+    @pytest.mark.parametrize(
+        'path,error', [('/var/lib/plinth_storage_test_not_exists', '4'),
+                       ('/tmp/plint_storage_test_not_exists', ''),
+                       ('/var/../tmp/plint_storage_test_not_exists', '')])
+    def test_validate_directory_creatable(self, path, error):
         """Test that directory creatable validation returns expected output."""
-        self.assert_validate_directory(directory['path'], directory['error'],
-                                       check_creatable=True)
+        self.assert_validate_directory(path, error, check_creatable=True)

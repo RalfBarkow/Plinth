@@ -1,44 +1,32 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app for upgrades.
 """
 
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_noop
 
+import plinth
 from plinth import actions
 from plinth import app as app_module
-from plinth import menu
+from plinth import cfg, glib, menu
 
 from .manifest import backup  # noqa, pylint: disable=unused-import
 
-version = 1
+version = 3
 
 is_essential = True
 
-managed_packages = ['unattended-upgrades']
+managed_packages = ['unattended-upgrades', 'needrestart']
 
-name = _('Update')
-
-description = [
-    _('Check for and apply the latest software and security updates.')
+_description = [
+    _('Check for and apply the latest software and security updates.'),
+    _('Updates are run at 06:00 everyday according to local time zone. Set '
+      'your time zone in Date & Time app. Apps are restarted after update '
+      'causing them to be unavailable briefly. If system reboot is deemed '
+      'necessary, it is done automatically at 02:00 causing all apps to be '
+      'unavailable briefly.')
 ]
-
-manual_page = 'Upgrades'
 
 app = None
 
@@ -48,12 +36,56 @@ class UpgradesApp(app_module.App):
 
     app_id = 'upgrades'
 
+    can_be_disabled = False
+
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-upgrades', name, None, 'fa-refresh',
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               is_essential=is_essential, name=_('Update'),
+                               icon='fa-refresh', description=_description,
+                               manual_page='Upgrades')
+        self.add(info)
+
+        menu_item = menu.Menu('menu-upgrades', info.name, None, info.icon,
                               'upgrades:index', parent_url_name='system')
         self.add(menu_item)
+
+        self._show_new_release_notification()
+
+        # Check every day for setting up apt backport sources, every 3 minutes
+        # in debug mode.
+        interval = 180 if cfg.develop else 24 * 3600
+        glib.schedule(interval, _setup_repositories)
+
+    def _show_new_release_notification(self):
+        """When upgraded to new release, show a notification."""
+        from plinth.notification import Notification
+        try:
+            note = Notification.get('upgrades-new-release')
+            if note.data['version'] == plinth.__version__:
+                # User already has notification for update to this version. It
+                # may be dismissed or not yet dismissed
+                return
+
+            # User currently has a notification for an older version, update.
+            dismiss = False
+        except KeyError:
+            # Don't show notification for the first version user runs, create
+            # but don't show it.
+            dismiss = True
+
+        data = {
+            'version': plinth.__version__,
+            'app_name': 'Update',
+            'app_icon': 'fa-refresh'
+        }
+        title = ugettext_noop('FreedomBox Updated')
+        note = Notification.update_or_create(
+            id='upgrades-new-release', app_id='upgrades', severity='info',
+            title=title, body_template='upgrades-new-release.html', data=data,
+            group='admin')
+        note.dismiss(should_dismiss=dismiss)
 
 
 def init():
@@ -66,7 +98,18 @@ def init():
 def setup(helper, old_version=None):
     """Install and configure the module."""
     helper.install(managed_packages)
-    helper.call('post', actions.superuser_run, 'upgrades', ['enable-auto'])
+
+    # Enable automatic upgrades but only on first install
+    if not old_version:
+        helper.call('post', actions.superuser_run, 'upgrades', ['enable-auto'])
+
+    # Update apt preferences whenever on first install and on version
+    # increment.
+    helper.call('post', actions.superuser_run, 'upgrades', ['setup'])
+
+    # Try to setup apt repositories, if needed, if possible, on first install
+    # and on version increment.
+    helper.call('post', _setup_repositories, None)
 
 
 def is_enabled():
@@ -83,3 +126,8 @@ def enable():
 def disable():
     """Disable the module."""
     actions.superuser_run('upgrades', ['disable-auto'])
+
+
+def _setup_repositories(data):
+    """Setup apt backport repositories."""
+    actions.superuser_run('upgrades', ['setup-repositories'])

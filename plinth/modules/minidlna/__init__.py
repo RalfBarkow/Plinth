@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app to configure minidlna.
 """
@@ -24,23 +9,17 @@ from plinth import actions, frontpage, menu
 from plinth.daemon import Daemon
 from plinth.modules.apache.components import Webserver
 from plinth.modules.firewall.components import Firewall
-from plinth.modules.users import register_group
+from plinth.modules.users.components import UsersAndGroups
 
 from .manifest import backup, clients  # noqa
 
-version = 1
-
-name = 'minidlna'
-
-icon_filename = name
+version = 2
 
 managed_packages = ['minidlna']
 
 managed_services = ['minidlna']
 
-short_description = _('Simple Media Server')
-
-description = [
+_description = [
     _('MiniDLNA is a simple media server software, with the aim of being '
       'fully compliant with DLNA/UPnP-AV clients. '
       'The MiniDNLA daemon serves media files '
@@ -50,10 +29,6 @@ description = [
       'media players, Smartphones, Televisions, and gaming systems ('
       'such as PS3 and Xbox 360) or applications such as totem and Kodi.')
 ]
-
-clients = clients
-
-group = ('minidlna', _('Media streaming server'))
 
 app = None
 
@@ -65,28 +40,34 @@ class MiniDLNAApp(app_module.App):
     def __init__(self):
         """Initialize the app components"""
         super().__init__()
+
+        groups = {'minidlna': _('Media streaming server')}
+
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               name=_('MiniDLNA'), icon_filename='minidlna',
+                               short_description=_('Simple Media Server'),
+                               description=_description,
+                               manual_page='MiniDLNA', clients=clients)
+        self.add(info)
+
         menu_item = menu.Menu(
             'menu-minidlna',
-            name=name,
-            short_description=short_description,
+            name=info.name,
+            short_description=info.short_description,
             url_name='minidlna:index',
             parent_url_name='apps',
-            icon=icon_filename,
+            icon=info.icon_filename,
         )
-        firewall = Firewall('firewall-minidlna', name, ports=['minidlna'],
+        firewall = Firewall('firewall-minidlna', info.name, ports=['minidlna'],
                             is_external=False)
         webserver = Webserver('webserver-minidlna', 'minidlna-freedombox',
                               urls=['http://localhost:8200/'])
-        shortcut = frontpage.Shortcut(
-            'shortcut-minidlna',
-            name,
-            short_description=short_description,
-            description=description,
-            icon=icon_filename,
-            url='/_minidlna/',
-            login_required=True,
-            allowed_groups=[group[0]],
-        )
+        shortcut = frontpage.Shortcut('shortcut-minidlna', info.name,
+                                      short_description=info.short_description,
+                                      description=info.description,
+                                      icon=info.icon_filename,
+                                      url='/_minidlna/', login_required=True,
+                                      allowed_groups=list(groups))
         daemon = Daemon('daemon-minidlna', managed_services[0])
 
         self.add(menu_item)
@@ -95,12 +76,15 @@ class MiniDLNAApp(app_module.App):
         self.add(shortcut)
         self.add(daemon)
 
+        users_and_groups = UsersAndGroups('users-and-groups-minidlna',
+                                          groups=groups)
+        self.add(users_and_groups)
+
 
 def init():
     """Initialize the module."""
     global app
     app = MiniDLNAApp()
-    register_group(group)
 
     setup_helper = globals()['setup_helper']
     if setup_helper.get_state() != 'needs-setup' and app.is_enabled():
@@ -111,4 +95,5 @@ def setup(helper, old_version=None):
     """Install and configure the package"""
     helper.install(managed_packages)
     helper.call('post', actions.superuser_run, 'minidlna', ['setup'])
-    helper.call('post', app.enable)
+    if not old_version:
+        helper.call('post', app.enable)

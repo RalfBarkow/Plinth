@@ -1,27 +1,11 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 URLs for the Network module
 """
 
 from django.conf.urls import url
-from stronghold.decorators import public
 
-from . import networks as views
+from . import views
 
 urlpatterns = [
     url(r'^sys/networks/$', views.index, name='index'),
@@ -42,10 +26,20 @@ urlpatterns = [
         r'(?P<interface_name>[^/]+)/)?$', views.add_wifi, name='add_wifi'),
     url(r'^sys/networks/(?P<uuid>[\w.@+-]+)/delete/$', views.delete,
         name='delete'),
-    url(r'^sys/networks/router-setup-guide/$',
-        views.router_configuration_help_page,
-        name='router_setup'),
-    url(r'^sys/networks/firstboot/$',
-        public(views.router_configuration_help_page),
-        name='firstboot_router_setup'),
+    url(r'^sys/networks/router-configuration/$',
+        views.RouterConfigurationView.as_view(), name='router-configuration'),
+    url(r'^sys/networks/firstboot/router-configuration/$',
+        views.RouterConfigurationFirstBootView.as_view(),
+        name='router-configuration-first-boot'),
+    url(r'^sys/networks/internet-connection-type/$',
+        views.InternetConnectionTypeView.as_view(),
+        name='internet-connection-type'),
+    url(r'^sys/networks/firstboot/internet-connection-type/$',
+        views.InternetConnectionTypeFirstBootView.as_view(),
+        name='internet-connection-type-first-boot'),
+    url(r'^sys/networks/network-topology/$',
+        views.NetworkTopologyView.as_view(), name='network-topology'),
+    url(r'^sys/networks/firstboot/network-topology-first-boot/$',
+        views.NetworkTopologyFirstBootView.as_view(),
+        name='network-topology-first-boot'),
 ]

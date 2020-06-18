@@ -1,0 +1,694 @@
+/*
+# SPDX-License-Identifier: AGPL-3.0-or-later
+*/
+
+@font-face {
+    font-family: 'Lato';
+    src: url('../lato/Lato-Italic.woff2') format('woff2');
+    font-style: italic;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'Lato';
+    src: url('../lato/Lato-Regular.woff2') format('woff2');
+    font-style: normal;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'Lato';
+    src: url('../lato/Lato-Semibold.woff2') format('woff2');
+    font-style: normal;
+    font-weight: 600;
+}
+
+@font-face {
+    font-family: 'Lato';
+    src: url('../lato/Lato-SemiboldItalic.woff2') format('woff2');
+    font-style: italic;
+    font-weight: 600;
+}
+
+@font-face {
+    font-family: 'Lato';
+    src: url('../lato/Lato-Bold.woff2') format('woff2');
+    font-style: normal;
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: 'Lato';
+    src: url('../lato/Lato-BoldItalic.woff2') format('woff2');
+    font-style: italic;
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: 'Lato';
+    src: url('../lato/Lato-Heavy.woff2') format('woff2');
+    font-style: normal;
+    font-weight: 800;
+}
+
+@font-face {
+    font-family: 'Lato';
+    src: url('../lato/Lato-HeavyItalic.woff2') format('woff2');
+    font-style: italic;
+    font-weight: 800;
+}
+
+
+body {
+    padding-top: 6em;
+    position: relative;
+    font-family: Lato, sans-serif;
+    font-size: 15px;
+    background: url('../img/noise.png') #f1f1f1;
+}
+
+@media (max-width: 767px) {
+    body {
+        background: none;
+    }
+
+    body.index-page,
+    body.apps-page,
+    body.system-page {
+        background: url('../img/noise.png') #f1f1f1;
+    }
+}
+
+.multiple-checkbox li {
+    list-style-type: none;
+}
+
+.nav .fa {
+    margin-right: 4px;
+}
+
+.navbar-brand .fa {
+    float: left;
+    margin-top: -19px;
+    padding: 8px;
+}
+
+.navbar-brand {
+    height: 53px;
+    margin-right: -30px;
+}
+
+.nav-tabs {
+    margin-bottom: 20px;
+}
+
+.running-status-parent {
+    display: inline-block;
+}
+
+.running-status {
+    border-radius: 50%;
+    border: 1px solid black;
+    width: 8px;
+    height: 8px;
+    display: inline-block;
+}
+
+.running-status.active {
+    background-color: rgb(0, 167, 0);
+}
+
+.running-status.inactive {
+    background-color: rgb(228, 66, 66);
+}
+
+.running-status.loading {
+    border: 4px solid #f3f3f3; /* Light grey */
+    border-top: 4px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    animation: spin 1s linear infinite;
+}
+
+.nav-link:hover, .nav-link:visited, .nav-link:link, .nav-link:active {
+    text-decoration: none;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.form-diagnostics-button {
+    display: block;
+}
+
+.form-diagnostics-button .btn {
+    width: 100%;
+    border-radius: 0;
+    border: none;
+    text-align: left;
+    padding: 3px 20px;
+}
+
+.form-diagnostics-button .btn:hover,
+.form-diagnostics-button .btn:focus {
+    background-color:#f5f5f5
+}
+
+/* Hide log out button if user dropdown is available */
+.js #logout-nojs {
+    display: none;
+}
+
+/* Hide the dropdown icon when javascript is not available */
+.no-js .nav .dropdown .caret {
+    display: none;
+}
+
+.diagnostics-results .diagnostics-result {
+    width: 60px;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+.footer-logo {
+    width: 140px;
+}
+
+html {
+    position: relative;
+}
+
+body,
+html {
+    height: 100%;
+}
+
+#wrapper {
+    min-height: 100%;
+    position: relative;
+}
+
+.container {
+  max-width: 1000px;
+}
+
+.content-container {
+    margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+    .content-container {
+        padding: 25px 50px 50px;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+}
+
+footer {
+    text-align: center;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    height: 150px;
+    padding-top: 150px;
+}
+
+.shortcut-label {
+    min-height: 50px;
+}
+
+/*
+ * Clients information
+ */
+.client-icon {
+    display: inline-block;
+    width: 100%;
+    height: auto;
+    max-height: 20px;
+    max-width: 20px;
+    margin: auto;
+}
+
+#clients .btn {
+    width: 8em;
+    margin-right: 1em;
+}
+
+#clients th, #clients td {
+    line-height: 3.1em;
+}
+
+/* Icon when collapsible content is shown */
+.collapsible-button .fa {
+    margin-left: 5px;
+}
+
+.collapsible-button .fa-chevron-right:before,
+.no-js .collapsible-button.collapsed .fa-chevron-right:before {
+    content: "\f078";
+}
+
+.collapsible-button.collapsed .fa-chevron-right:before {
+    content: "\f054";
+}
+
+/* No-JS fallbacks for collapsible content */
+.no-js .collapse {
+    display: block;
+}
+
+.manual-page {
+    text-align: right;
+}
+
+/* applying styles to header - begin */
+.main-header {
+    background: #4989D4;
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.25);
+    border: none;
+}
+
+.main-header .navbar-nav>li>a {
+    color: #FFF;
+}
+
+.main-header.navbar-default .navbar-nav>li>a:focus,
+.main-header.navbar-default .navbar-nav>li>a:hover,
+.main-header.navbar-default .navbar-nav>.active>a,
+.main-header.navbar-default .navbar-nav>.active>a:hover,
+.main-header.navbar-default .navbar-nav>.active>a:focus,
+.main-header.navbar-default .navbar-nav>.open>a,
+.main-header.navbar-default .navbar-nav>.open>a:hover,
+.main-header.navbar-default .navbar-nav>.open>a:focus {
+    color: #FFF;
+    background: transparent;
+}
+
+@media screen and (max-width: 767px) {
+    .main-header.navbar-default .navbar-nav>.open .dropdown-menu > li > a,
+    .main-header.navbar-default .navbar-nav>.open .dropdown-menu > li > a:hover {
+        color: #FFF;
+    }
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+    background-color: #FFF;
+}
+
+/* applying styles to header - end */
+
+.card-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: left;
+}
+
+.card-section-title {
+    display: flex;
+    font-style: italic;
+    font-weight: 800;
+    font-size: 20px;
+    padding: 0 4.6rem;
+    margin: 2rem 0;
+}
+
+.card-section-title:before, .card-section-title:after {
+    color: white;
+    content: '';
+    flex: 1;
+    border-bottom: #d4d4d4 solid 2px;
+    margin: auto 1.8rem;
+}
+
+a.menu_link {
+    text-decoration: none;
+}
+
+a.menu_link:hover,a.menu_link:active {
+    text-decoration: none;
+}
+
+a.menu_link_active {
+    border-bottom: white 3px solid;
+}
+
+.card {
+    text-align: center;
+    box-shadow: 0 3px 5px 0 rgba(0,0,0,0.12);
+    width: 16rem;
+    padding: 0;
+    margin: 0 10px 20px;
+    border: none;
+    border-radius: 8px;
+}
+
+.card:hover {
+    box-shadow: 0 5px 15px 2px rgba(0, 0, 0, 0.2);
+}
+
+.card .nav-link {
+    display: block;
+    padding: 4px;
+    color: #646464;
+}
+
+.card-title {
+    font-style: italic;
+    font-weight: 800;
+    font-size: 20px;
+    padding: 12px 0;
+}
+
+.card-description {
+   font-size: 18px;
+   font-weight: 400;
+   padding: 12px 0;
+}
+
+.card-description {
+    color: #646464;
+    font-size: 12px;
+}
+
+.card-icon img {
+    width: 128px;
+    height: 128px;
+}
+
+.card-icon span {
+    width: 100px;
+    height: 100px;
+    font-size: 80px;
+}
+
+.card-icon img {
+    width: 100px;
+    height: 100px;
+    font-size: 80px;
+}
+
+/* System page - special card styling */
+.system-page .card {
+    text-align: left;
+    width: 23rem;
+}
+
+.system-page .card .nav-link {
+    display: grid;
+    grid-template-columns: 35px auto;
+    grid-column-gap: 10px;
+    padding: 13px;
+}
+
+.system-page .card-title {
+    font-size: 18px;
+    font-style: normal;
+    font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    grid-row: 1;
+    grid-column: 2;
+    padding: 0;
+}
+
+.system-page .card-icon {
+    grid-row: 1 / 3;
+    grid-column: 1;
+}
+
+.system-page .card-icon span {
+    height: auto;
+    font-size: 35px;
+}
+
+.system-page .card-description {
+    grid-row: 2;
+    grid-column: 2;
+    padding: 0;
+    min-height: 1.8rem;
+}
+
+/* Button table - Tables with a list of actions as buttons on top */
+.button-table > .button-row + .table {
+    margin-top: 10px;
+}
+
+.bg-warning {
+    margin: 10px 0;
+    padding: 15px;
+}
+
+.bg-warning p:last-child {
+    margin: 0;
+}
+
+.index-page .card-list:before,
+.apps-page .card-list:before,
+.system-page .card-list:before {
+    position: relative;
+    width: 40rem;
+    height: 40rem;
+    margin-left: -40rem;
+    margin-bottom: -40rem;
+    left: 30rem;
+    top: -2rem;
+    content: " ";
+    background-size: 100%;
+    background-repeat: no-repeat;
+    z-index: -1;
+}
+
+.index-page .card-list:before {
+    background-image: url('../img/freedombox-logo-background.svg');
+}
+
+.apps-page .card-list-primary:before {
+    background-image: url('../img/apps-background.svg');
+}
+
+.system-page .card-list:before {
+    background-image: url('../img/system-background.svg');
+}
+
+.names-table {
+    table-layout: fixed;
+    overflow-wrap: break-word;
+}
+
+.names-domain-column {
+    width: 50%;
+}
+
+/*
+ * Toggle button
+ */
+.toggle-button {
+    border-radius: 13px;
+    width: 50px;
+    height: 26px;
+    background: #ccc;
+    position: relative;
+}
+
+.toggle-button::before {
+    content: '';
+    display: block;
+    height: 24px;
+    width: 24px;
+    border-radius: 100%;
+    background: #fff;
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    transform: translateY(-50%);
+}
+
+.toggle-button--toggled {
+    background: #4989D4;
+}
+
+.toggle-button--toggled::before {
+    left: 100%;
+    transform: translateY(-50%) translateX(-100%)
+}
+
+/*
+ * Button toolbar
+ */
+.btn-toolbar {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.btn-toolbar .button-extra-actions {
+    float: right;
+}
+
+/*
+ * App's header
+ */
+.app-header {
+    display: grid;
+    grid-template-columns: 0.2fr 1fr;
+    column-gap: 20px;
+    margin-bottom: 20px;
+}
+
+.app-header > img {
+    margin: 25px auto 0;
+    width: 100%;
+}
+
+.app-description {
+    grid-column: 2;
+}
+
+.app-header-single-column  {
+    grid-template-columns: 1fr;
+}
+.app-header-single-column .app-description {
+    grid-column: 1;
+}
+
+.app-titles {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+}
+
+.app-titles h3 {
+    margin-top: -0.5rem;
+    margin-bottom: 1.6rem;
+    font-size: 1.6rem;
+    font-weight: normal;
+    font-style: italic;
+}
+
+.form-app-enable-disable {
+    margin: auto 0;
+}
+
+@media screen and (max-width: 767px) {
+    .app-header {
+        display: flex;
+        flex-flow: column;
+    }
+
+    .app-header img {
+        width: 150px;
+        height: 150px;
+        margin-top: 0;
+    }
+
+    .app-titles {
+        display: flex;
+        flex-flow: column-reverse;
+        justify-content: center;
+        height: auto;
+    }
+
+    .app-titles h2 {
+        margin: 0 0 15px 0;
+    }
+
+    .app-titles .form-app-enable-disable {
+        margin: 30px auto;
+    }
+
+    .app-titles .toggle-button {
+        transform: scale(1.2);
+    }
+}
+
+/* Help manual - anchor is below navbar */
+*[id^='idm']:before {
+    display: block;
+    content: " ";
+    margin-top: -60px;
+    height: 60px;
+    visibility: hidden;
+}
+
+/*
+ * Notifications
+ */
+.notifications {
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+.notifications .dropdown-menu {
+    width: 100%;
+    padding: 0;
+    float: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin-top: 0;
+}
+
+/* Style for individual notification */
+.notification {
+    padding: 1rem 1.5rem;
+    font-size: 15px;
+}
+
+.notification:not(:first-child) {
+    border-top: 1px solid #ddd;
+}
+
+.notification-title {
+    font-weight: bold;
+}
+
+img.notification-icon {
+    display: inline-block;
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-top: -0.4rem;
+}
+
+/* Show badge with various colors and overlap it onto icon */
+.notifications-dropdown .badge {
+    padding: 2px 5px;
+    margin-left: -12px;
+    color: #fff;
+}
+
+.badge-exception, .badge-error {
+    background-color: #d9534f;
+}
+
+.badge-warning {
+    background-color: #ec971f;
+}
+
+.badge-info, badge-debug {
+    background-color: #5bc0de;
+}
+
+/* Don't collapse notifications on small screens */
+.collapsing .notifications-dropdown,
+.collapse.in .notifications-dropdown {
+    display: none;
+}
+
+.navbar-header .navbar-nav {
+    float: right;
+    margin: 6px 10px;
+}
+
+@media(min-width:768px) {
+    .navbar-header .navbar-nav {
+        display: none;
+    }
+}

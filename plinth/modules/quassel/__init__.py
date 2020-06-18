@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app for Quassel.
 """
@@ -31,6 +16,7 @@ from plinth.modules import names
 from plinth.modules.firewall.components import Firewall
 from plinth.modules.letsencrypt.components import LetsEncrypt
 from plinth.utils import format_lazy
+from plinth.modules.users.components import UsersAndGroups
 
 from .manifest import backup, clients  # noqa, pylint: disable=unused-import
 
@@ -42,13 +28,7 @@ managed_packages = ['quassel-core']
 
 managed_paths = [pathlib.Path('/var/lib/quassel/')]
 
-name = _('Quassel')
-
-icon_filename = 'quassel'
-
-short_description = _('IRC Client')
-
-description = [
+_description = [
     format_lazy(
         _('Quassel is an IRC application that is split into two parts, a '
           '"core" and a "client". This allows the core to remain connected '
@@ -64,12 +44,6 @@ description = [
       'are available.'),
 ]
 
-clients = clients
-
-reserved_usernames = ['quasselcore']
-
-manual_page = 'Quassel'
-
 port_forwarding_info = [('TCP', 4242)]
 
 app = None
@@ -83,20 +57,28 @@ class QuasselApp(app_module.App):
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-quassel', name, short_description,
-                              'quassel', 'quassel:index',
-                              parent_url_name='apps')
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               name=_('Quassel'), icon_filename='quassel',
+                               short_description=_('IRC Client'),
+                               description=_description, manual_page='Quassel',
+                               clients=clients)
+        self.add(info)
+
+        menu_item = menu.Menu('menu-quassel', info.name,
+                              info.short_description, info.icon_filename,
+                              'quassel:index', parent_url_name='apps')
         self.add(menu_item)
 
         shortcut = frontpage.Shortcut(
-            'shortcut-quassel', name, short_description=short_description,
-            icon=icon_filename, description=description,
-            configure_url=reverse_lazy('quassel:index'), clients=clients,
+            'shortcut-quassel', info.name,
+            short_description=info.short_description, icon=info.icon_filename,
+            description=info.description,
+            configure_url=reverse_lazy('quassel:index'), clients=info.clients,
             login_required=True)
         self.add(shortcut)
 
-        firewall = Firewall('firewall-quassel', name, ports=['quassel-plinth'],
-                            is_external=True)
+        firewall = Firewall('firewall-quassel', info.name,
+                            ports=['quassel-plinth'], is_external=True)
         self.add(firewall)
 
         letsencrypt = LetsEncrypt(
@@ -111,6 +93,10 @@ class QuasselApp(app_module.App):
         daemon = Daemon('daemon-quassel', managed_services[0],
                         listen_ports=[(4242, 'tcp4'), (4242, 'tcp6')])
         self.add(daemon)
+
+        users_and_groups = UsersAndGroups('users-and-groups-quasselcore',
+                                          reserved_usernames=['quasselcore'])
+        self.add(users_and_groups)
 
 
 def init():

@@ -4,15 +4,110 @@
 
 FreedomBox is built as part of Debian GNU/Linux. However, you don't need to
 install Debian to do development for FreedomBox. FreedomBox development is
-typically done on a Virtual Machine. You can work on any operating system that
-can install latest versions of Git, Vagrant and VirtualBox.
+typically done on a container or a Virtual Machine. For running a container, you
+need systemd containers, Git and Python. This approach is recommended. For
+running a VM, you can work on any operating system that can install latest
+versions of Git, Vagrant and VirtualBox.
+
+## Using Containers
+
+The ./container script shipped with FreedomBox source code can manage the
+development environment inside a systemd-nspawn container.
+
+1.  Checkout FreedomBox Service (Plinth) source code using Git.
+
+    ```bash
+    host$ git clone https://salsa.debian.org/freedombox-team/freedombox.git
+    host$ cd freedombox
+    ```
+
+2.  To download, setup, run, and configure a container for FreedomBox
+    development, simply execute in your FreedomBox Service (Plinth) development
+    folder:
+
+    ```bash
+    host$ ./container up
+    ```
+
+3.  SSH into the running container with the following command:
+
+    ```bash
+    host$ ./container ssh
+    ```
+
+### Using after Setup
+
+After logging into the container, the source code is available in /freedombox
+directory:
+
+```bash
+guest$ cd /freedombox
+```
+
+Run the development version of FreedomBox Service (Plinth) from your source
+directory in the container using the following command. This command
+continuously deploys your code changes into the container providing a
+quick feedback cycle during development.
+
+```bash
+guest$ freedombox-develop
+```
+
+If you have changed any system configuration files during your development,
+you will need to run the following to install those files properly on to the
+system and their changes to reflect properly.
+
+```bash
+guest$ sudo ./setup.py install
+```
+
+Note: This development container has automatic upgrades disabled by default.
+
+## Using Vagrant
+
+Use VirtualBox and Vagrant if for some reason, the container option is not
+suitable such as when you are running non-GNU/Linux machine or a non-systemd
+machine.
 
 ### For Debian GNU/Linux and Derivatives
 
 1. Install Git, Vagrant and VirtualBox using apt.
 
-   ```
+   ```bash
    $ sudo apt install git virtualbox vagrant
+   ```
+
+#### Installing VirtualBox manually
+
+1. Add Oracle's key to apt's list of accepted keys.
+
+   ```bash
+   $ sudo wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+   ```
+
+2. Create a file under /etc/apt/sources.list.d/ for virtualbox package.
+
+
+   ```bash
+   $ sudo touch /etc/apt/sources.list.d/virtualbox.list
+   ```
+
+3. Add the relevant source for your Debian/derivative distribution into the above file.
+
+Example for Buster:
+   ```
+   deb https://download.virtualbox.org/virtualbox/debian buster contrib
+   ```
+
+4. Search and install the latest virtualbox package.
+
+   ```bash
+   $ apt search virtualbox
+
+       # virtualbox-6.1
+       # virtualbox-6.0
+
+   $ sudo apt install virtualbox-6.1
    ```
 
 ### For Other GNU/Linux Distributions or *BSDs
@@ -21,14 +116,14 @@ can install latest versions of Git, Vagrant and VirtualBox.
 
 ### For macOS
 
-1. Install [Brew](https://brew.sh/).
+1. Install [Homebrew](https://brew.sh/).
 
-2. Install Git, Vagrant and VirtualBox using Brew.
+2. Install Git, VirtualBox and Vagrant using Homebrew.
 
-   ```
-   brew install git
-   brew cask install vagrant
-   brew cask install virtualbox
+   ```bash
+   $ brew install git
+   $ brew cask install virtualbox
+   $ brew cask install vagrant
    ```
 
 ### For Windows
@@ -40,13 +135,13 @@ can install latest versions of Git, Vagrant and VirtualBox.
 
 2. Tell Git to use Unix line endings by running the following in Git Bash.
 
-   ```
-   git config --global core.autocrlf input
+   ```bash
+   host$ git config --global core.autocrlf input
    ```
 
 3. Run all the following commands inside Git Bash.
 
-## Setting Up Development Environment Using Vagrant
+### Setting Up Development Environment Using Vagrant
 
 Vagrant is a free software command line utility for managing the life cycle of
 virtual machines. The FreedomBox project provides ready-made virtual machines
@@ -57,57 +152,66 @@ and requires about 4.5 GB of disk space.
 
 1.  Checkout FreedomBox Service (Plinth) source code using Git.
 
-    ```
-    git clone https://salsa.debian.org/freedombox-team/plinth.git
-    cd plinth
+    ```bash
+    host$ git clone https://salsa.debian.org/freedombox-team/freedombox.git
+    host$ cd freedombox
     ```
 
 2.  To download, setup, run, and configure a VM for FreedomBox development using
     Vagrant, simply execute in your FreedomBox Service (Plinth) development
     folder:
 
-    ```
-    $ vagrant up
+    ```bash
+    host$ vagrant up
     ```
 
 3.  SSH into the running vagrant box with the following command:
 
-    ```
-    $ vagrant ssh
-    ```
-
-4.  Run the development version of FreedomBox Service (Plinth) from your source
-    directory in the virtual machine using the following command. This command
-    continuously deploys your code changes into the virtual machine providing a
-    quick feedback cycle during development.
-
-    ```
-    $ sudo -u plinth /vagrant/run --develop
+    ```bash
+    host$ vagrant ssh
     ```
 
-5.  If you have changed any system configuration files during your development,
-    you will need to run the following to install those files properly on to the
-    system and their changes to reflect properly.
+### Using the Virtual Machine
 
-    ```
-    $ sudo ./setup.py install
-    ```
+After logging into the virtual machine (VM), the source code is available in
+/vagrant directory:
+
+```bash
+vm$ cd /vagrant
+```
+
+Run the development version of FreedomBox Service (Plinth) from your source
+directory in the virtual machine using the following command. This command
+continuously deploys your code changes into the virtual machine providing a
+quick feedback cycle during development.
+
+```bash
+vm$ sudo -u plinth /vagrant/run --develop
+```
+
+If you have changed any system configuration files during your development,
+you will need to run the following to install those files properly on to the
+system and their changes to reflect properly.
+
+```bash
+vm$ sudo ./setup.py install
+```
 
 Note: This development virtual machine has automatic upgrades disabled by
 default.
 
 ## Running Tests
 
-To run all the tests:
+To run all the tests in the container/VM:
 
 ```bash
-$ py.test-3
+guest$ py.test-3
 ```
 
 Another way to run tests (not recommended):
 
 ```bash
-$ ./setup.py test
+guest$ ./setup.py test
 ```
 
 To run a specific test function, test class or test module, use pytest filtering
@@ -117,30 +221,30 @@ options. See pytest documentation for further filter options.
 
 ```bash
 # Run tests in a directory
-$ py.test-3 plinth/tests
+guest$ py.test-3 plinth/tests
 
 # Run tests in a module
-$ py.test-3 plinth/tests/test_actions.py
+guest$ py.test-3 plinth/tests/test_actions.py
 
 # Run tests of one class in test module
-$ py.test-3 plinth/tests/test_actions.py::TestActions
+guest$ py.test-3 plinth/tests/test_actions.py::TestActions
 
 # Run one test in a class or module
-$ py.test-3 plinth/tests/test_actions.py::TestActions::test_is_package_manager_busy
+guest$ py.test-3 plinth/tests/test_actions.py::TestActions::test_is_package_manager_busy
 ```
 
 ## Running the Test Coverage Analysis
 
-To run the coverage tool:
+To run the coverage tool in the container/VM:
 
-```
-$ py.test-3 --cov=plinth
+```bash
+guest$ py.test-3 --cov=plinth
 ```
 
 To collect HTML report:
 
-```
-$ py.test-3 --cov=plinth --cov-report=html
+```bash
+guest$ py.test-3 --cov=plinth --cov-report=html
 ```
 
 Invoking this command generates a HTML report to the `htmlcov` directory.
@@ -155,9 +259,21 @@ executed (red).
 
 ### Install Dependencies
 
+#### For running tests inside the container
+
+Inside the container run
+
+```bash
+guest$ cd /freedombox ; sudo functional_tests/install.sh
+```
+
 #### For running tests inside the VM
 
-Run `vagrant provision --provision-with tests`.
+From the host, provision the virtual machine with tests:
+
+```bash
+host$ vagrant provision --provision-with tests
+```
 
 #### For running tests on host machine
 
@@ -165,13 +281,14 @@ Follow the instructions below to run the tests on host machine. If you wish
 perform the tests on host machine, the host machine must be based on Debian
 Buster (or later).
 
-```
-$ pip3 install splinter
-$ pip3 install pytest-splinter
-$ sudo apt install python3-pytest-bdd
-$ sudo apt install xvfb python3-pytest-xvfb  # optional, to avoid opening browser windows
-$ sudo apt install firefox
-$ sudo apt install smbclient # optional, to test samba
+```bash
+host$ pip3 install splinter
+host$ pip3 install pytest-splinter
+host$ pip3 install pytest-xdist  # optional, to run tests in parallel
+host$ sudo apt install firefox
+host$ sudo apt install python3-pytest-bdd
+host$ sudo apt install xvfb python3-pytest-xvfb  # optional, to avoid opening browser windows
+host$ sudo apt install smbclient  # optional, to test samba
 ```
 
 - Install the latest version of geckodriver. It is usually a single binary which
@@ -203,31 +320,38 @@ tests will create the required user using FreedomBox's first boot process.
 
 ### Run Functional Tests
 
-**When inside a VM you will need to target the guest VM**
+**When inside a container/VM you will need to target the guest**
 
 ```bash
-export FREEDOMBOX_URL=https://localhost FREEDOMBOX_SAMBA_PORT=445
+guest$ export FREEDOMBOX_URL=https://localhost FREEDOMBOX_SAMBA_PORT=445
 ```
 
 You will be running `py.test-3`.
 
-```
-$ py.test-3 --include-functional
+```bash
+guest$ py.test-3 --include-functional
 ```
 
 The full test suite can take a long time to run (more than an hour). You can
 also specify which tests to run, by specifying a mark:
 
-```
-$ py.test-3 -m essential --include-functional
-$ py.test-3 -m mediawiki --include-functional
+```bash
+guest$ py.test-3 -m essential --include-functional
+guest$ py.test-3 -m mediawiki --include-functional
 ```
 
 If xvfb is installed and you still want to see browser windows, use the
 `--no-xvfb` command-line argument.
 
+```bash
+guest$ py.test-3 --no-xvfb -m mediawiki --include-functional
 ```
-$ py.test-3 --no-xvfb -m mediawiki --include-functional
+
+Tests can also be run in parallel, provided you have the pytest-xdist plugin
+installed.
+
+```
+$ py.test-3 -n 4 --dist=loadfile --include-functional -m essential
 ```
 
 ## Building the Documentation Separately
@@ -238,19 +362,19 @@ there. Both these are build during the installation process.
 
 To build the documentation separately, run:
 
-```
-$ make -C doc
+```bash
+guest$ make -C doc
 ```
 
 ## Repository
 
 FreedomBox Service (Plinth) is available from
-[salsa.debian.org](https://salsa.debian.org/freedombox-team/plinth).
+[salsa.debian.org](https://salsa.debian.org/freedombox-team/freedombox).
 
 ## Bugs & TODO
 
 You can report bugs on FreedomBox Service's (Plinth's) [issue
-tracker](https://salsa.debian.org/freedombox-team/plinth/issues).
+tracker](https://salsa.debian.org/freedombox-team/freedombox/issues).
 
 See CONTRIBUTING.md for information how to best contribute code.
 

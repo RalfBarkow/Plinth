@@ -1,20 +1,5 @@
 #!/usr/bin/python3
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Configuration helper for the Tor service
 """
@@ -80,7 +65,7 @@ def parse_arguments():
 
 def subcommand_setup(arguments):
     """Setup Tor configuration after installing it."""
-    if arguments.old_version and arguments.old_version <= 3:
+    if arguments.old_version and arguments.old_version <= 4:
         _upgrade_orport_value()
         return
 
@@ -163,7 +148,8 @@ def _upgrade_orport_value():
     aug = augeas_load()
 
     if _is_relay_enabled(aug):
-        aug.set(TOR_CONFIG + '/ORPort', '[::]:9001')
+        aug.set(TOR_CONFIG + '/ORPort[1]', '9001')
+        aug.set(TOR_CONFIG + '/ORPort[2]', '[::]:9001')
 
     aug.save()
 
@@ -256,7 +242,7 @@ def _get_upstream_bridges(aug):
 
 def _is_relay_enabled(aug):
     """Return whether a relay is enabled."""
-    orport = aug.get(TOR_CONFIG + '/ORPort')
+    orport = aug.get(TOR_CONFIG + '/ORPort[1]')
     return bool(orport) and orport != '0'
 
 
@@ -405,7 +391,8 @@ def _enable_relay(relay=None, bridge=None, aug=None):
     use_upstream_bridges = _are_upstream_bridges_enabled(aug)
 
     if relay == 'enable' and not use_upstream_bridges:
-        aug.set(TOR_CONFIG + '/ORPort', '[::]:9001')
+        aug.set(TOR_CONFIG + '/ORPort[1]', '9001')
+        aug.set(TOR_CONFIG + '/ORPort[2]', '[::]:9001')
     elif relay == 'disable':
         aug.remove(TOR_CONFIG + '/ORPort')
 

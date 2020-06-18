@@ -1,19 +1,4 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app for configuring MediaWiki.
 """
@@ -35,15 +20,9 @@ logger = logging.getLogger(__name__)
 
 class MediaWikiAppView(views.AppView):
     """App configuration page."""
-    clients = mediawiki.clients
-    name = mediawiki.name
-    description = mediawiki.description
     app_id = 'mediawiki'
     form_class = MediaWikiForm
-    manual_page = mediawiki.manual_page
-    show_status_block = False
     template_name = 'mediawiki.html'
-    icon_filename = mediawiki.icon_filename
 
     def get_initial(self):
         """Return the values to fill in the form."""
@@ -63,27 +42,12 @@ class MediaWikiAppView(views.AppView):
         def is_unchanged(key):
             return old_config[key] == new_config[key]
 
-        app_same = is_unchanged('is_enabled')
-        pub_reg_same = is_unchanged('enable_public_registrations')
-        private_mode_same = is_unchanged('enable_private_mode')
-        default_skin_same = is_unchanged('default_skin')
-
         if new_config['password']:
             actions.superuser_run('mediawiki', ['change-password'],
                                   input=new_config['password'].encode())
             messages.success(self.request, _('Password updated'))
 
-        if (app_same and pub_reg_same and private_mode_same
-                and default_skin_same):
-            if not self.request._messages._queued_messages:
-                messages.info(self.request, _('Setting unchanged'))
-        elif not app_same:
-            if new_config['is_enabled']:
-                self.app.enable()
-            else:
-                self.app.disable()
-
-        if not pub_reg_same:
+        if not is_unchanged('enable_public_registrations'):
             # note action public-registration restarts, if running now
             if new_config['enable_public_registrations']:
                 if not new_config['enable_private_mode']:
@@ -101,7 +65,7 @@ class MediaWikiAppView(views.AppView):
                 messages.success(self.request,
                                  _('Public registrations disabled'))
 
-        if not private_mode_same:
+        if not is_unchanged('enable_private_mode'):
             if new_config['enable_private_mode']:
                 actions.superuser_run('mediawiki', ['private-mode', 'enable'])
                 messages.success(self.request, _('Private mode enabled'))
@@ -116,7 +80,7 @@ class MediaWikiAppView(views.AppView):
             shortcut = mediawiki.app.get_component('shortcut-mediawiki')
             shortcut.login_required = new_config['enable_private_mode']
 
-        if not default_skin_same:
+        if not is_unchanged('default_skin'):
             actions.superuser_run(
                 'mediawiki', ['set-default-skin', new_config['default_skin']])
             messages.success(self.request, _('Default skin changed'))

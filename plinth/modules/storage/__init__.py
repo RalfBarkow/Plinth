@@ -1,46 +1,30 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 FreedomBox app to manage storage.
 """
+
+import base64
 import logging
 import subprocess
 
 import psutil
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_noop
 
 from plinth import actions
 from plinth import app as app_module
-from plinth import cfg, menu, utils
-from plinth.daemon import Daemon
+from plinth import cfg, glib, menu, utils
 from plinth.errors import ActionError, PlinthError
 from plinth.utils import format_lazy, import_from_gi
 
+from . import udisks2
 from .manifest import backup  # noqa, pylint: disable=unused-import
 
 version = 4
 
-name = _('Storage')
+managed_packages = ['parted', 'udisks2', 'gir1.2-udisks-2.0']
 
-managed_services = ['freedombox-udiskie']
-
-managed_packages = ['parted', 'udiskie', 'gir1.2-udisks-2.0']
-
-description = [
+_description = [
     format_lazy(
         _('This module allows you to manage storage media attached to your '
           '{box_name}. You can view the storage media currently in use, mount '
@@ -49,8 +33,6 @@ description = [
 ]
 
 logger = logging.getLogger(__name__)
-
-manual_page = 'Storage'
 
 is_essential = True
 
@@ -62,15 +44,27 @@ class StorageApp(app_module.App):
 
     app_id = 'storage'
 
+    can_be_disabled = False
+
     def __init__(self):
         """Create components for the app."""
         super().__init__()
-        menu_item = menu.Menu('menu-storage', name, None, 'fa-hdd-o',
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               is_essential=is_essential, name=_('Storage'),
+                               icon='fa-hdd-o', description=_description,
+                               manual_page='Storage')
+        self.add(info)
+
+        menu_item = menu.Menu('menu-storage', info.name, None, info.icon,
                               'storage:index', parent_url_name='system')
         self.add(menu_item)
 
-        daemon = Daemon('daemon-udiskie', managed_services[0])
-        self.add(daemon)
+        # Check every hour for low disk space, every 3 minutes in debug mode
+        interval = 180 if cfg.develop else 3600
+        glib.schedule(interval, warn_about_low_disk_space)
+
+        # Schedule initialization of UDisks2 initialization
+        glib.schedule(3, udisks2.init, repeat=False)
 
 
 def init():
@@ -81,15 +75,15 @@ def init():
 
 
 def get_disks():
-    """Returns list of disks by combining information from df and lsblk."""
-    disks = _get_disks_from_udisks()
-    disks_from_df = _get_disks_from_df()
+    """Returns list of disks by combining information from df and udisks."""
+    disks = _get_disks_from_df()
+    disks_from_udisks = _get_disks_from_udisks()
 
-    # Add size info from df to the disks from udisks based on mount point.
-    for disk_from_udisks in disks:
-        for disk_from_df in disks_from_df:
+    # Add info from udisks to the disks from df based on mount point.
+    for disk_from_df in disks:
+        for disk_from_udisks in disks_from_udisks:
             if disk_from_udisks['mount_point'] == disk_from_df['mount_point']:
-                disk_from_udisks.update(disk_from_df)
+                disk_from_df.update(disk_from_udisks)
 
     return sorted(disks, key=lambda disk: disk['device'])
 
@@ -138,7 +132,7 @@ def _get_disks_from_df():
     disks = []
     for line in output.splitlines()[1:]:
         parts = line.split(maxsplit=6)
-        keys = ('device', 'file_system_type', 'size', 'used', 'free',
+        keys = ('device', 'filesystem_type', 'size', 'used', 'free',
                 'percent_used', 'mount_point')
         disk = dict(zip(keys, parts))
         disk['percent_used'] = int(disk['percent_used'].rstrip('%'))
@@ -148,6 +142,8 @@ def _get_disks_from_df():
         disk['size_str'] = format_bytes(disk['size'])
         disk['used_str'] = format_bytes(disk['used'])
         disk['free_str'] = format_bytes(disk['free'])
+        disk['label'] = None
+        disk['is_removable'] = None
         disks.append(disk)
 
     return disks
@@ -286,3 +282,73 @@ def setup(helper, old_version=None):
             expand_partition(root_device)
         except ActionError:
             pass
+
+
+def warn_about_low_disk_space(request):
+    """Warn about insufficient space on root partition."""
+    from plinth.notification import Notification
+
+    try:
+        root_info = get_disk_info('/')
+    except PlinthError as exception:
+        logger.exception('Error getting information about root partition: %s',
+                         exception)
+        return
+
+    show = False
+    if root_info['percent_used'] > 90 or root_info['free_gib'] < 1:
+        severity = 'error'
+        show = True
+    elif root_info['percent_used'] > 75 or root_info['free_gib'] < 2:
+        severity = 'warning'
+        show = True
+
+    if not show:
+        try:
+            Notification.get('storage-low-disk-space').delete()
+        except KeyError:
+            pass
+    else:
+        message = ugettext_noop(
+            # xgettext:no-python-format
+            'Low space on system partition: {percent_used}% used, '
+            '{free_space} free.')
+        title = ugettext_noop('Low disk space')
+        data = {
+            'app_icon': 'fa-hdd-o',
+            'app_name': ugettext_noop('Storage'),
+            'percent_used': root_info['percent_used'],
+            'free_space': format_bytes(root_info['free_bytes'])
+        }
+        actions = [{
+            'type': 'link',
+            'class': 'primary',
+            'text': 'Go to {app_name}',
+            'url': 'storage:index'
+        }, {
+            'type': 'dismiss'
+        }]
+        Notification.update_or_create(id='storage-low-disk-space',
+                                      app_id='storage', severity=severity,
+                                      title=title, message=message,
+                                      actions=actions, data=data,
+                                      group='admin')
+
+
+def report_failing_drive(id, is_failing):
+    """Show or withdraw notification about failing drive."""
+    notification_id = 'storage-disk-failure-' + base64.b32encode(
+        id.encode()).decode()
+
+    from plinth.notification import Notification
+    title = ugettext_noop('Disk failure imminent')
+    message = ugettext_noop(
+        'Disk {id} is reporting that it is likely to fail in the near future. '
+        'Copy any data while you still can and replace the drive.')
+    data = {'id': id}
+    note = Notification.update_or_create(id=notification_id, app_id='storage',
+                                         severity='error', title=title,
+                                         message=message, actions=[{
+                                             'type': 'dismiss'
+                                         }], data=data, group='admin')
+    note.dismiss(should_dismiss=not is_failing)

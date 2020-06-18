@@ -1,24 +1,9 @@
-#
-# This file is part of FreedomBox.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """
 Test module for custom context processors.
 """
 
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from django.http import HttpRequest
@@ -34,7 +19,8 @@ def fixture_menu():
     menu_module.init()
 
 
-def test_common():
+@patch('plinth.notification.Notification')
+def test_common(Notification):
     """Verify that the common() function returns the correct values."""
     cfg.read()  # initialize config settings
 
@@ -62,7 +48,8 @@ def test_common():
     assert response['user_is_admin']
 
 
-def test_common_border_conditions():
+@patch('plinth.notification.Notification')
+def test_common_border_conditions(Notification):
     """Verify that the common() function works for border conditions."""
     request = HttpRequest()
     request.path = ''
