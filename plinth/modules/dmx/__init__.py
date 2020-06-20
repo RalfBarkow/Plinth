@@ -71,6 +71,10 @@ tunnels_to_manage = {
     'DMX HTTP Proxy': 'dmx-http-proxy-freedombox'
 }
 
+_description = [
+    _('DMX is a platform for knowledge management and collaboration. ')
+]
+
 app = None
 
 
@@ -82,6 +86,12 @@ class DmxApp(app_module.App):
     def __init__(self):
         """Create components for the app."""
         super().__init__()
+        info = app_module.Info(app_id=self.app_id, version=version,
+                               name=_('DMX'), icon_filename='dmx',
+                               short_description=_('Headless CMS'),
+                               description=_description, clients=clients)
+        self.add(info)
+
         menu_item = menu.Menu('menu-dmx', name, short_description,
                               'dmx', 'dmx:index',
                               parent_url_name='apps')
